@@ -199,7 +199,7 @@ export default function PhotoWallClient() {
 
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] flex h-dvh w-screen cursor-zoom-out flex-col overflow-hidden overscroll-contain bg-black/95 px-[3vw] pb-[3dvh] pt-[clamp(1rem,8dvh,4rem)] backdrop-blur-2xl animate-fade-in"
+          className="fixed inset-0 z-[100] flex h-dvh w-screen cursor-zoom-out flex-col items-center overflow-hidden overscroll-contain bg-black/95 px-[3vw] pb-[3dvh] pt-[clamp(1rem,8dvh,4rem)] backdrop-blur-2xl animate-fade-in"
           onClick={() => setSelectedImage(null)}
         >
           <button
@@ -222,7 +222,7 @@ export default function PhotoWallClient() {
 
           {selectedImage.caption && (
             <p
-              className="mt-[2dvh] max-h-[18dvh] w-full max-w-[calc(100vw-2rem)] shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
+              className="mt-[2dvh] max-h-[18dvh] w-fit max-w-[calc(100vw-2rem)] shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
               onClick={(e) => e.stopPropagation()}
             >
               {selectedImage.caption}

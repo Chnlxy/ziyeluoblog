@@ -212,6 +212,7 @@ test("shows photo notes below the lightbox image", () => {
     "utf8",
   );
   assert.match(photoWall, /className="mt-\[2dvh\][^"]*max-h-\[18dvh\]/);
+  assert.match(photoWall, /w-fit[^"]*max-w-\[calc\(100vw-2rem\)\]/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
 
@@ -229,6 +230,7 @@ test("keeps the photo lightbox usable when the page is zoomed", () => {
     "utf8",
   );
   assert.match(photoWall, /fixed inset-0 z-\[100\][^"]*h-dvh/);
+  assert.match(photoWall, /fixed inset-0 z-\[100\][^"]*items-center/);
   assert.match(photoWall, /flex min-h-0[^"]*flex-1/);
   assert.match(photoWall, /max-h-full max-w-full/);
   assert.match(photoWall, /max-h-\[18dvh\]/);
