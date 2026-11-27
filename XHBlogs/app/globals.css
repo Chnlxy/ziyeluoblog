@@ -138,7 +138,7 @@
 }
 
 .footprints-globe-stage {
-  transform: translateX(0) scale(1);
+  transform: translateX(0);
   transform-origin: center top;
   transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
@@ -155,7 +155,7 @@
   }
 
   .footprints-layout--panel-open .footprints-globe-stage {
-    transform: translateX(-205px) scale(0.667);
+    transform: translateX(-205px);
   }
 
   .footprints-layout--panel-open .travel-detail-motion {

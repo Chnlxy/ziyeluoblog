@@ -771,6 +771,10 @@ test("animates footprint layout transitions smoothly", () => {
   );
   assert.match(
     styles,
-    /\.footprints-layout--panel-open\s+\.footprints-globe-stage\s*\{[\s\S]*transform:\s*translateX\(-205px\)\s+scale\(0\.667\);/,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-stage\s*\{[\s\S]*transform:\s*translateX\(-205px\);/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-stage\s*\{[^}]*scale\(/,
   );
 });
