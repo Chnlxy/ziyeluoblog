@@ -35,7 +35,8 @@ test("chooses the desktop background at the desktop breakpoint", () => {
     path.join(root, "components", "ResponsiveBackground.tsx"),
     "utf8",
   );
-  assert.match(component, /<source media="\(min-width: 768px\)"/);
+  assert.match(component, /media="\(min-width: 768px\),/);
+  assert.match(component, /\(hover: hover\) and \(pointer: fine\)/);
   assert.match(component, /siteConfig\.backgroundConfig/);
   assert.match(component, /background\.mobile/);
   assert.match(component, /background\.desktop/);

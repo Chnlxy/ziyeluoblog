@@ -10,7 +10,10 @@ export default function ResponsiveBackground() {
   return (
     <div className="site-background" aria-hidden="true">
       <picture style={pictureStyle}>
-        <source media="(min-width: 768px)" srcSet={background.desktop} />
+        <source
+          media="(min-width: 768px), (hover: hover) and (pointer: fine)"
+          srcSet={background.desktop}
+        />
         <img
           src={background.mobile}
           alt=""
