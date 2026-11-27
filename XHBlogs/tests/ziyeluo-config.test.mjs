@@ -714,6 +714,22 @@ test("detects WebGL once outside render and manages modal focus", () => {
   assert.doesNotMatch(globe, /setFrontFacing/);
 });
 
+test("fades the globe in after its textures load", () => {
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+
+  assert.match(
+    globe,
+    /texturesReady\s*\?\s*"opacity-100"\s*:\s*"opacity-0"/,
+  );
+  assert.match(globe, /transition-opacity/);
+  assert.match(globe, /duration-700/);
+  assert.match(globe, /aria-hidden=\{texturesReady\}/);
+  assert.match(globe, /motion-reduce:transition-none/);
+});
+
 test("keeps a fading route during destination switches", () => {
   const globe = fs.readFileSync(
     path.join(root, "components", "TravelGlobe.tsx"),

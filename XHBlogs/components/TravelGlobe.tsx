@@ -733,6 +733,9 @@ export default function TravelGlobe({
   return (
     <div ref={containerRef} className="relative h-full w-full">
       <Canvas
+        className={`transition-opacity duration-700 ease-out motion-reduce:transition-none ${
+          texturesReady ? "opacity-100" : "opacity-0"
+        }`}
         aria-label="旅行足迹地球"
         camera={{ position: [0, 0.6, 3.2], fov: 42 }}
         dpr={[1, maxDpr]}
@@ -749,14 +752,15 @@ export default function TravelGlobe({
           onTexturesReady={handleTexturesReady}
         />
       </Canvas>
-      {!texturesReady && (
-        <div
-          aria-live="polite"
-          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#1b1c18]/35 text-sm font-bold text-slate-200 backdrop-blur-sm"
-        >
-          正在加载地球纹理……
-        </div>
-      )}
+      <div
+        aria-live="polite"
+        aria-hidden={texturesReady}
+        className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#1b1c18]/35 text-sm font-bold text-slate-200 backdrop-blur-sm transition-opacity duration-500 motion-reduce:transition-none ${
+          texturesReady ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        正在加载地球纹理……
+      </div>
       <div className="sr-only" aria-label="地点列表">
         <p>杭州 · 起点</p>
         {places.map((place) => (
