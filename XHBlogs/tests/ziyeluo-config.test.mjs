@@ -220,12 +220,13 @@ test("opens a tagged footprints photo in Google Maps", () => {
   );
 
   assert.doesNotMatch(photoWall, /到这儿去/);
-  assert.match(panel, /photoMetadata|metadata=/);
+  assert.match(panel, /albumPhotosByUrl|photoLocation/);
   assert.match(panel, /https:\/\/www\.google\.com\/maps\/search\//);
-  assert.match(lightbox, /metadata/);
-  assert.match(lightbox, /到这儿去/);
-  assert.match(lightbox, /target="_blank"/);
-  assert.match(lightbox, /rel="noopener noreferrer"/);
+  assert.match(panel, /到这儿去/);
+  assert.match(panel, /target="_blank"/);
+  assert.match(panel, /rel="noopener noreferrer"/);
+  assert.match(panel, /px-5 py-3 text-base/);
+  assert.doesNotMatch(lightbox, /metadata|到这儿去|google\.com\/maps/);
 });
 
 test("shows photo notes below the lightbox image", () => {

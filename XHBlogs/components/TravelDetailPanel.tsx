@@ -14,9 +14,7 @@ import {
   formatTravelVisitRange,
   type TravelPlace,
 } from "../lib/travel";
-import MomentImageLightbox, {
-  type ImageLightboxMetadata,
-} from "./MomentImageLightbox";
+import MomentImageLightbox from "./MomentImageLightbox";
 
 export default function TravelDetailPanel({
   place,
@@ -42,23 +40,15 @@ export default function TravelDetailPanel({
       sortedVisits.flatMap((visit) => visit.photos),
     [sortedVisits],
   );
-  const photoMetadata = useMemo<ImageLightboxMetadata[]>(() => {
-    const albumPhotos = new Map(
-      albums.flatMap((album) =>
-        album.photos.map((photo) => [photo.url, photo] as const),
+  const albumPhotosByUrl = useMemo(
+    () =>
+      new Map(
+        albums.flatMap((album) =>
+          album.photos.map((photo) => [photo.url, photo] as const),
+        ),
       ),
-    );
-    return photos.map((src) => {
-      const photo = albumPhotos.get(src);
-      return {
-        caption: photo?.caption,
-        mapUrl: photo?.location
-          ? `https://www.google.com/maps/search/?api=1&query=${photo.location.latitude},${photo.location.longitude}`
-          : undefined,
-        mapLabel: photo?.location?.name,
-      };
-    });
-  }, [photos]);
+    [],
+  );
 
   useEffect(() => {
     const focusFrame = window.requestAnimationFrame(() => {
@@ -153,26 +143,51 @@ export default function TravelDetailPanel({
                   </p>
                 )}
                 {visit.photos.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {visit.photos.map((src, photoIndex) => (
-                      <button
-                        key={`${src}-${photoIndex}`}
-                        type="button"
-                        aria-label={`查看${place.name}旅行照片 ${precedingPhotos + photoIndex + 1}`}
-                        onClick={() =>
-                          openLightbox(precedingPhotos + photoIndex)
-                        }
-                        className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 outline-none focus:ring-2 focus:ring-indigo-300"
-                      >
-                        <img
-                          src={src}
-                          alt={
-                            visit.note?.trim() || `${place.name}旅行照片`
-                          }
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                        />
-                      </button>
-                    ))}
+                  <div className="mt-3 space-y-3">
+                    {visit.photos.map((src, photoIndex) => {
+                      const photoLocation =
+                        albumPhotosByUrl.get(src)?.location;
+                      const mapUrl = photoLocation
+                        ? `https://www.google.com/maps/search/?api=1&query=${photoLocation.latitude},${photoLocation.longitude}`
+                        : null;
+
+                      return (
+                        <div
+                          key={`${src}-${photoIndex}`}
+                          className="flex flex-wrap items-center gap-3"
+                        >
+                          <button
+                            type="button"
+                            aria-label={`查看${place.name}旅行照片 ${precedingPhotos + photoIndex + 1}`}
+                            onClick={() =>
+                              openLightbox(precedingPhotos + photoIndex)
+                            }
+                            className="group relative h-32 w-32 shrink-0 overflow-hidden rounded-xl border border-white/10 outline-none focus:ring-2 focus:ring-indigo-300"
+                          >
+                            <img
+                              src={src}
+                              alt={
+                                visit.note?.trim() ||
+                                `${place.name}旅行照片`
+                              }
+                              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          </button>
+                          {mapUrl && photoLocation && (
+                            <a
+                              href={mapUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`在 Google 地图中打开${photoLocation.name}`}
+                              className="flex shrink-0 items-center gap-2 rounded-2xl border border-indigo-300/25 bg-indigo-500/20 px-5 py-3 text-base font-black text-indigo-100 shadow-lg backdrop-blur-md transition hover:border-indigo-300/45 hover:bg-indigo-500/30"
+                            >
+                              <MapPin size={18} />
+                              到这儿去
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -193,7 +208,6 @@ export default function TravelDetailPanel({
           onClose={closeLightbox}
           onChange={changeLightbox}
           ariaLabel={`查看${place.name}旅行照片`}
-          metadata={photoMetadata}
         />
       )}
     </>
