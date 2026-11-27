@@ -11,6 +11,7 @@ export default function MobileBackButton() {
   if (
     pathname === '/' ||
     pathname.startsWith('/posts/') ||
+    pathname.startsWith('/photowall') ||
     pathname === '/about' ||
     pathname === '/friends'
   ) {

@@ -199,22 +199,30 @@ export default function PhotoWallClient() {
 
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-4 sm:p-10 cursor-zoom-out animate-fade-in"
+          className="fixed inset-0 z-[100] flex min-h-dvh cursor-zoom-out flex-col items-center justify-start gap-3 overflow-y-auto overscroll-contain bg-black/95 px-3 pb-6 pt-16 backdrop-blur-2xl animate-fade-in sm:justify-center sm:p-8"
           onClick={() => setSelectedImage(null)}
         >
-          <button className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full p-2">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button
+            type="button"
+            aria-label="关闭照片"
+            onClick={() => setSelectedImage(null)}
+            className="fixed right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white sm:right-6 sm:top-6 sm:h-12 sm:w-12"
+          >
+            <svg className="h-4 w-4 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
           <img
             src={selectedImage.url}
             alt={selectedImage.caption || '全屏照片'}
-            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            className="max-h-[calc(100dvh-8rem)] max-w-[calc(100vw-2rem)] shrink-0 rounded-lg object-contain shadow-2xl sm:max-h-[calc(100dvh-10rem)] sm:max-w-[calc(100vw-8rem)]"
             onClick={(e) => e.stopPropagation()}
           />
 
           {selectedImage.caption && (
-            <p className="mt-5 max-w-2xl rounded-2xl border border-white/10 bg-white/10 px-6 py-3 text-center text-sm font-medium tracking-wide text-white shadow-2xl backdrop-blur-md">
+            <p
+              className="mt-3 max-h-[20dvh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:mt-5 sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
               {selectedImage.caption}
             </p>
           )}

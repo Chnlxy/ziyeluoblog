@@ -210,7 +210,7 @@ test("shows photo notes below the lightbox image", () => {
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
-  assert.match(photoWall, /selectedImage\.caption[\s\S]{0,250}mt-5/);
+  assert.match(photoWall, /className="mt-3[^"]*sm:mt-5/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
 
@@ -220,4 +220,20 @@ test("does not depend on remote Google fonts during deployment", () => {
     "utf8",
   );
   assert.doesNotMatch(layout, /next\/font\/google|Noto_Serif_SC|Geist\(/);
+});
+
+test("keeps the photo lightbox usable when the page is zoomed", () => {
+  const photoWall = fs.readFileSync(
+    path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
+    "utf8",
+  );
+  assert.match(photoWall, /overflow-y-auto overscroll-contain/);
+  assert.match(photoWall, /max-h-\[calc\(100dvh-8rem\)\]/);
+  assert.match(photoWall, /max-w-\[calc\(100vw-2rem\)\]/);
+
+  const mobileBack = fs.readFileSync(
+    path.join(root, "components", "MobileBackButton.tsx"),
+    "utf8",
+  );
+  assert.match(mobileBack, /pathname\.startsWith\(["']\/photowall["']\)/);
 });
