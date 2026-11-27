@@ -213,3 +213,11 @@ test("shows photo notes below the lightbox image", () => {
   assert.match(photoWall, /selectedImage\.caption[\s\S]{0,250}mt-5/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
+
+test("does not depend on remote Google fonts during deployment", () => {
+  const layout = fs.readFileSync(
+    path.join(root, "app", "layout.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(layout, /next\/font\/google|Noto_Serif_SC|Geist\(/);
+});

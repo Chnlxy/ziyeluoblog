@@ -15,9 +15,9 @@
   --color-pink-300: #e1be9d;
   --color-pink-400: #c99b72;
   --color-pink-500: #b7835e;
-  --font-serif: var(--font-serif), "Noto Serif SC", "Songti SC", "SimSun", serif;
-  --font-sans: var(--font-geist-sans), "Noto Sans SC", "Microsoft YaHei", sans-serif;
-  --font-mono: var(--font-geist-mono), "JetBrains Mono", Consolas, monospace;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
 
 @layer base {
@@ -123,7 +123,7 @@
 
 .article-prose {
   color: #d4d6cc;
-  font-family: var(--font-serif), "Noto Serif SC", "Songti SC", serif;
+  font-family: var(--font-serif);
   font-size: 1rem;
   line-height: 1.9;
 }
