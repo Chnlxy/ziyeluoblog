@@ -423,21 +423,15 @@ test("shows the splash background behind the GIF", () => {
   assert.match(splash, /bg-transparent/);
 });
 
-test("uses a dedicated homepage avatar", () => {
+test("uses the homepage illustration as the shared site avatar", () => {
   const config = fs.readFileSync(path.join(root, "siteConfig.ts"), "utf8");
   const profile = fs.readFileSync(
     path.join(root, "components", "ProfileCard.tsx"),
     "utf8",
   );
-  const asset = path.join(
-    root,
-    "public",
-    "images",
-    "avatars",
-    "home.webp",
-  );
 
-  assert.match(config, /homeAvatarUrl:\s*"\/images\/avatars\/home\.webp"/);
-  assert.ok(fs.existsSync(asset));
-  assert.match(profile, /siteConfig\.homeAvatarUrl/);
+  assert.match(config, /avatarUrl:\s*"\/images\/avatars\/home\.webp"/);
+  assert.doesNotMatch(config, /homeAvatarUrl/);
+  assert.match(profile, /siteConfig\.avatarUrl/);
+  assert.doesNotMatch(profile, /siteConfig\.homeAvatarUrl/);
 });

@@ -10,8 +10,7 @@ export const siteConfig = {
   navSuffix: "の",
   navAfter: "幻想郷",
 
-  avatarUrl: "/avatar-placeholder.svg",
-  homeAvatarUrl: "/images/avatars/home.webp",
+  avatarUrl: "/images/avatars/home.webp",
   splashImageUrl: "/images/splash-praying-girl.gif",
 
   useGradient: false,
