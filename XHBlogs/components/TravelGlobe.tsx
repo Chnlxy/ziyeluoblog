@@ -31,6 +31,7 @@ const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-mobile.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-mobile.jpg";
 const MARKER_BEAM_HEIGHT = 0.07;
+const MARKER_CAP_RADIUS = 0.018;
 const MARKER_SURFACE_RADIUS = 1.003;
 
 const vertexShader = `
@@ -316,12 +317,16 @@ function Marker({
 
   useFrame(({ camera }) => {
     if (!group.current) return;
+    const markerScale =
+      Math.max(0.75, camera.position.length() / 3.2) *
+      (selected || focused ? 1.22 : 1);
     const visibility = markerHorizonVisibility(
       [position.x, position.y, position.z],
       [camera.position.x, camera.position.y, camera.position.z],
-      MARKER_BEAM_HEIGHT,
+      MARKER_BEAM_HEIGHT * markerScale,
+      MARKER_CAP_RADIUS * markerScale,
     );
-    const visible = visibility > 0.002;
+    const visible = visibility > 0;
     group.current.visible = visible;
     if (wasVisible.current !== visible) {
       wasVisible.current = visible;
@@ -332,9 +337,6 @@ function Marker({
         }
       }
     }
-    const markerScale =
-      Math.max(0.75, camera.position.length() / 3.2) *
-      (selected || focused ? 1.22 : 1);
     group.current.scale.setScalar(markerScale);
 
     const interactiveOpacity = hovered || focused || selected ? 1 : 0.8;

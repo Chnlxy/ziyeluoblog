@@ -354,15 +354,18 @@ export function isMarkerFrontFacing(
 export function markerHorizonVisibility(
   markerPosition: [number, number, number],
   cameraPosition: [number, number, number],
-  beamHeight: number,
+  beamTipOffset: number,
+  capRadius: number,
 ) {
   const normal = normalize(markerPosition);
-  const beamTipRadius = Math.hypot(...markerPosition) + beamHeight;
-  const horizon =
-    dot(normal, cameraPosition) * beamTipRadius - 1;
-  const amount = Math.max(
-    0,
-    Math.min(1, horizon / (0.12 * beamTipRadius)),
-  );
+  const beamTipRadius = Math.hypot(...markerPosition) + beamTipOffset;
+  const cameraDepth = dot(normal, cameraPosition);
+  const outerHorizon = cameraDepth * (beamTipRadius + capRadius) - 1;
+  const innerHorizon = cameraDepth * (beamTipRadius - capRadius) - 1;
+
+  if (outerHorizon <= 0) return 0;
+  if (innerHorizon >= 0) return 1;
+
+  const amount = outerHorizon / (outerHorizon - innerHorizon);
   return amount * amount * (3 - 2 * amount);
 }

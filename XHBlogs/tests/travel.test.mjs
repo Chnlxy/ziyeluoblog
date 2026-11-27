@@ -308,26 +308,18 @@ test("shows markers only when they face the camera", () => {
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
 });
 
-test("fully fades only after the marker beam tip crosses the horizon", () => {
+test("fades only while the marker cap crosses the horizon", () => {
   const markerBase = latLngToVector3([0, 0], 1.003);
   const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
+  const visibilityAt = (x) =>
+    markerHorizonVisibility(markerBase, cameraAt(x), 0.07, 0.018);
 
+  assert.equal(visibilityAt(1), 1);
+  const partiallyHidden = visibilityAt(0.93);
+  assert.ok(partiallyHidden > 0 && partiallyHidden < 1);
+  assert.equal(visibilityAt(0.9), 0);
   assert.equal(
-    markerHorizonVisibility(markerBase, cameraAt(1.1), 0.07),
-    1,
-  );
-  const tipJustVisible = markerHorizonVisibility(
-    markerBase,
-    cameraAt(0.95),
-    0.07,
-  );
-  assert.ok(tipJustVisible > 0 && tipJustVisible < 1);
-  assert.equal(
-    markerHorizonVisibility(markerBase, cameraAt(0.92), 0.07),
-    0,
-  );
-  assert.equal(
-    markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07),
+    markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07, 0.018),
     0,
   );
 });
