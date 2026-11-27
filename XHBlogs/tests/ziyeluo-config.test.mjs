@@ -252,3 +252,19 @@ test("desktop navigation retracts while scrolling down", () => {
   assert.match(navbar, /bg-\[#171812\]\/95/);
   assert.match(navbar, /-translate-y-full/);
 });
+
+test("keeps the closed search below the desktop navigation", () => {
+  const searchBar = fs.readFileSync(
+    path.join(root, "components", "SearchBar.tsx"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(
+    searchBar,
+    /className="relative w-full max-w-2xl mx-auto mb-10 z-\[100\]"/,
+  );
+  assert.match(
+    searchBar,
+    /isOpen\s*\?\s*["']z-\[100\]["']\s*:\s*["']z-40["']/,
+  );
+});

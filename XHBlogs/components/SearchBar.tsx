@@ -73,7 +73,12 @@ export default function SearchBar({ posts = [] }: { posts: Post[] }) {
   }, [searchQuery, posts]);
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto mb-10 z-[100]" ref={containerRef}>
+    <div
+      className={`relative w-full max-w-2xl mx-auto mb-10 ${
+        isOpen ? "z-[100]" : "z-40"
+      }`}
+      ref={containerRef}
+    >
       <form className="relative group" onSubmit={(e) => e.preventDefault()}>
 
         {/* 先渲染 Input */}
