@@ -124,6 +124,30 @@
   backdrop-filter: blur(22px);
 }
 
+.footprints-layout {
+  display: grid;
+  align-items: start;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.travel-detail-panel {
+  min-width: 0;
+}
+
+@media (min-width: 1280px) {
+  .footprints-layout--panel-open {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+
+  .travel-detail-panel {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100dvh - 8rem);
+    overflow-y: auto;
+  }
+}
+
 .article-prose {
   color: #d4d6cc;
   font-family: var(--font-serif);

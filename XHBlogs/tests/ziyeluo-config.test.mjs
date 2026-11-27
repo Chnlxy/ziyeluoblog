@@ -712,3 +712,29 @@ test("keeps a fading route during destination switches", () => {
   assert.match(globe, /setOutgoingRoute/);
   assert.match(globe, /useLayoutEffect/);
 });
+
+test("lays out footprint details without covering page text", () => {
+  const client = fs.readFileSync(
+    path.join(root, "app", "footprints", "FootprintsClient.tsx"),
+    "utf8",
+  );
+  const panel = fs.readFileSync(
+    path.join(root, "components", "TravelDetailPanel.tsx"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.match(client, /footprints-layout/);
+  assert.match(client, /footprints-layout--panel-open/);
+  assert.match(styles, /\.footprints-layout--panel-open\s*\{/);
+  assert.match(
+    styles,
+    /@media \(min-width: 1280px\)[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+390px;/,
+  );
+  assert.match(panel, /className="travel-detail-panel/);
+  assert.doesNotMatch(panel, /fixed inset-x-3 bottom-3/);
+  assert.doesNotMatch(panel, /document\.body\.style\.overflow = "hidden"/);
+});

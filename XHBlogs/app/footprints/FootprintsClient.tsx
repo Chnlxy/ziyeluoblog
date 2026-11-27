@@ -157,36 +157,41 @@ export default function FootprintsClient() {
             旅行数据暂时无法展示：{validationError}
           </div>
         ) : (
-          <section className="glass-card relative mt-8 min-h-[68dvh] overflow-hidden rounded-[2rem]">
-            {webglState === "checking" ? (
-              <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
-                正在准备旅程……
-              </div>
-            ) : webglState === "supported" ? (
-              <div className="h-[68dvh] min-h-[520px]">
-                <TravelGlobe
-                  places={travelPlaces}
-                  selectedId={selectedId}
+          <div
+            className={`footprints-layout ${
+              selectedPlace ? "footprints-layout--panel-open" : ""
+            }`}
+          >
+            <section className="glass-card relative min-h-[68dvh] overflow-hidden rounded-[2rem]">
+              {webglState === "checking" ? (
+                <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
+                  正在准备旅程……
+                </div>
+              ) : webglState === "supported" ? (
+                <div className="h-[68dvh] min-h-[520px]">
+                  <TravelGlobe
+                    places={travelPlaces}
+                    selectedId={selectedId}
+                    onSelect={selectPlace}
+                  />
+                </div>
+              ) : (
+                <WebglFallback
+                  places={fallbackPlaces}
                   onSelect={selectPlace}
                 />
-              </div>
-            ) : (
-              <WebglFallback
-                places={fallbackPlaces}
-                onSelect={selectPlace}
+              )}
+            </section>
+            {selectedPlace && (
+              <TravelDetailPanel
+                key={selectedPlace.id}
+                place={selectedPlace}
+                onClose={closeDetail}
               />
             )}
-          </section>
+          </div>
         )}
       </main>
-
-      {selectedPlace && (
-        <TravelDetailPanel
-          key={selectedPlace.id}
-          place={selectedPlace}
-          onClose={closeDetail}
-        />
-      )}
     </>
   );
 }

@@ -41,15 +41,12 @@ export default function TravelDetailPanel({
   );
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const focusFrame = window.requestAnimationFrame(() => {
       closeButton.current?.focus();
     });
 
     return () => {
       window.cancelAnimationFrame(focusFrame);
-      document.body.style.overflow = previousOverflow;
     };
   }, []);
 
@@ -91,7 +88,7 @@ export default function TravelDetailPanel({
         role="dialog"
         aria-label={`${place.name}旅行详情`}
         tabIndex={-1}
-        className="fixed inset-x-3 bottom-3 z-[80] max-h-[72dvh] overflow-y-auto rounded-3xl border border-white/15 bg-[#20211b]/95 p-5 shadow-2xl backdrop-blur-3xl desktop:inset-y-24 desktop:bottom-auto desktop:left-auto desktop:right-5 desktop:w-[390px]"
+        className="travel-detail-panel w-full rounded-3xl border border-white/15 bg-[#20211b]/95 p-5 shadow-2xl backdrop-blur-3xl"
       >
         <header className="flex items-start justify-between gap-4">
           <div>
