@@ -33,7 +33,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 hidden border-b border-white/10 bg-[#171812]/95 shadow-lg backdrop-blur-2xl transition-transform duration-300 md:block ${
+        className={`fixed inset-x-0 top-0 z-50 hidden border-b border-white/10 bg-[#171812]/65 shadow-lg backdrop-blur-2xl transition-transform duration-300 md:block ${
           showHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >

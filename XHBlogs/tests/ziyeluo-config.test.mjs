@@ -249,7 +249,8 @@ test("desktop navigation retracts while scrolling down", () => {
     "utf8",
   );
   assert.match(navbar, /addEventListener\(["']scroll["']/);
-  assert.match(navbar, /bg-\[#171812\]\/95/);
+  assert.match(navbar, /bg-\[#171812\]\/65/);
+  assert.match(navbar, /backdrop-blur-2xl/);
   assert.match(navbar, /-translate-y-full/);
 });
 
