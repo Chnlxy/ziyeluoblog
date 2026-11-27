@@ -16,6 +16,10 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 import {
+  type CelestialSnapshot,
+  buildCelestialSnapshot,
+} from "../lib/celestial";
+import {
   type TravelPlace,
   advanceMarkerOpacity,
   cameraPositionForRoute,
@@ -26,6 +30,7 @@ import {
   sampleGreatCircleArc,
   solarDirection,
 } from "../lib/travel";
+import CelestialSphere from "./CelestialSphere";
 
 const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
@@ -596,23 +601,45 @@ function TravelScene({
   places,
   selectedId,
   focusedId,
+  active,
   onSelect,
   onTexturesReady,
 }: {
   places: TravelPlace[];
   selectedId: string | null;
   focusedId: string | null;
+  active: boolean;
   onSelect: (id: string | null) => void;
   onTexturesReady: () => void;
 }) {
   const reducedMotion = useReducedMotion();
-  const [sun, setSun] = useState(() => solarDirection(new Date()));
+  const [celestial, setCelestial] =
+    useState<CelestialSnapshot | null>(() => {
+      try {
+        return buildCelestialSnapshot(new Date());
+      } catch {
+        return null;
+      }
+    });
+  const fallbackSun = useMemo(
+    () => solarDirection(new Date()),
+    [],
+  );
 
   useEffect(() => {
-    const update = () => setSun(solarDirection(new Date()));
-    const timer = setInterval(update, 60_000);
+    if (!active) return;
+    const update = () => {
+      try {
+        setCelestial(buildCelestialSnapshot(new Date()));
+      } catch {
+        setCelestial(null);
+      }
+    };
+    const timer = window.setInterval(update, 5_000);
     return () => clearInterval(timer);
-  }, []);
+  }, [active]);
+
+  const sun = celestial?.sunDirectionEarthFixed ?? fallbackSun;
 
   const selected = places.find((place) => place.id === selectedId) || null;
   const focused = places.find((place) => place.id === focusedId) || null;
@@ -660,6 +687,7 @@ function TravelScene({
         focusTarget={focusTarget}
         onFocusCancelled={() => setFocusCancelled(true)}
       />
+      {celestial && <CelestialSphere snapshot={celestial} />}
       <Suspense fallback={null}>
         <Earth sun={sun} onReady={onTexturesReady} />
       </Suspense>
@@ -748,6 +776,7 @@ export default function TravelGlobe({
           places={places}
           selectedId={selectedId}
           focusedId={focusedPlaceId}
+          active={pageVisible}
           onSelect={onSelect}
           onTexturesReady={handleTexturesReady}
         />
