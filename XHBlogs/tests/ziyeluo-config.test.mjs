@@ -356,3 +356,19 @@ test("publishes Bilibili and GitHub on the homepage", () => {
   assert.match(profile, /type="bilibili"/);
   assert.match(profile, /siteConfig\.social\?\.bilibili/);
 });
+
+test("uses the praying maiden loading label in the splash screen", () => {
+  const splash = fs.readFileSync(
+    path.join(root, "components", "SplashScreen.tsx"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.match(splash, /少女祈祷中/);
+  assert.equal((splash.match(/className="splash-dot"/g) ?? []).length, 3);
+  assert.match(styles, /\.splash-dot\s*\{/);
+  assert.match(styles, /@keyframes splash-dot/);
+});
