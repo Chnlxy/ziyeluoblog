@@ -734,6 +734,18 @@ test("fades the globe in after its textures load", () => {
   assert.match(globe, /aria-hidden=\{texturesReady\}/);
 });
 
+test("animates the globe loading dots like the splash screen", () => {
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+
+  assert.match(globe, /正在加载地球纹理/);
+  assert.equal((globe.match(/className="splash-dot"/g) ?? []).length, 3);
+  assert.match(globe, /className="splash-dots"/);
+  assert.doesNotMatch(globe, /正在加载地球纹理……/);
+});
+
 test("keeps a fading route during destination switches", () => {
   const globe = fs.readFileSync(
     path.join(root, "components", "TravelGlobe.tsx"),

@@ -759,7 +759,12 @@ export default function TravelGlobe({
           texturesReady ? "opacity-0" : "opacity-100"
         }`}
       >
-        正在加载地球纹理……
+        正在加载地球纹理
+        <span className="splash-dots" aria-hidden="true">
+          <span className="splash-dot">.</span>
+          <span className="splash-dot">.</span>
+          <span className="splash-dot">.</span>
+        </span>
       </div>
       <div className="sr-only" aria-label="地点列表">
         <p>杭州 · 起点</p>
