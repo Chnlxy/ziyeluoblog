@@ -319,6 +319,7 @@ function Marker({
     const visibility = markerHorizonVisibility(
       [position.x, position.y, position.z],
       [camera.position.x, camera.position.y, camera.position.z],
+      MARKER_BEAM_HEIGHT,
     );
     const visible = visibility > 0.002;
     group.current.visible = visible;

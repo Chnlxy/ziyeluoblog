@@ -308,27 +308,28 @@ test("shows markers only when they face the camera", () => {
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
 });
 
-test("fades markers smoothly across the horizon", () => {
-  const marker = latLngToVector3([0, 0], 1.025);
-  const justBelow = markerHorizonVisibility(
-    marker,
-    [1.02, Math.sqrt(9 - 1.02 ** 2), 0],
-  );
-  const fartherBelow = markerHorizonVisibility(
-    marker,
-    [0.96, Math.sqrt(9 - 0.96 ** 2), 0],
-  );
+test("fully fades only after the marker beam tip crosses the horizon", () => {
+  const markerBase = latLngToVector3([0, 0], 1.003);
+  const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
 
   assert.equal(
-    markerHorizonVisibility(marker, [3, 0, 0]),
+    markerHorizonVisibility(markerBase, cameraAt(1.1), 0.07),
     1,
   );
+  const tipJustVisible = markerHorizonVisibility(
+    markerBase,
+    cameraAt(0.95),
+    0.07,
+  );
+  assert.ok(tipJustVisible > 0 && tipJustVisible < 1);
   assert.equal(
-    markerHorizonVisibility(marker, [-3, 0, 0]),
+    markerHorizonVisibility(markerBase, cameraAt(0.92), 0.07),
     0,
   );
-  assert.ok(justBelow > 0 && justBelow < 1);
-  assert.ok(fartherBelow < justBelow);
+  assert.equal(
+    markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07),
+    0,
+  );
 });
 
 test("moves solar longitude across UTC time of day", () => {
