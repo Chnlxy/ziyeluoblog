@@ -755,6 +755,7 @@ test("animates footprint layout transitions smoothly", () => {
   assert.match(client, /AnimatePresence/);
   assert.match(client, /motion\.div/);
   assert.match(client, /footprints-globe-backdrop/);
+  assert.match(client, /footprints-globe-content/);
   assert.match(client, /travel-detail-motion/);
   assert.match(client, /height:\s*"auto"/);
   assert.match(client, /duration:\s*0\.3/);
@@ -785,5 +786,13 @@ test("animates footprint layout transitions smoothly", () => {
   assert.match(
     styles,
     /\.footprints-layout--panel-open\s+\.footprints-globe-backdrop\s*\{[\s\S]*width:\s*calc\(100%\s*-\s*205px\);/,
+  );
+  assert.match(
+    styles,
+    /\.footprints-globe-content\s*\{[^}]*transition:\s*transform 300ms cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\);/,
+  );
+  assert.match(
+    styles,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-content\s*\{[\s\S]*transform:\s*translateX\(-102\.5px\);/,
   );
 });

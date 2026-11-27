@@ -181,7 +181,7 @@ export default function FootprintsClient() {
                 aria-hidden="true"
                 className="footprints-globe-backdrop glass-card"
               />
-              <div className="relative z-10">
+              <div className="footprints-globe-content relative z-10">
                 {webglState === "checking" ? (
                   <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
                     正在准备旅程……

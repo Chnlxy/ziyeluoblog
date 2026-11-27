@@ -152,6 +152,11 @@
   transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.footprints-globe-content {
+  transform: translateX(0);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .travel-detail-panel {
   min-width: 0;
 }
@@ -168,6 +173,10 @@
 
   .footprints-layout--panel-open .footprints-globe-backdrop {
     width: calc(100% - 205px);
+  }
+
+  .footprints-layout--panel-open .footprints-globe-content {
+    transform: translateX(-102.5px);
   }
 
   .footprints-layout--panel-open .travel-detail-motion {
