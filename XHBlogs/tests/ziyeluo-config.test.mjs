@@ -126,7 +126,6 @@ test("production build validates types and ships no upstream domain", () => {
     "utf8",
   );
   assert.doesNotMatch(nextConfig, /ignoreBuildErrors\s*:\s*true/);
-  assert.equal(fs.existsSync(path.join(root, "public", "CNAME")), false);
   assert.equal(fs.existsSync(path.join(root, "public", "pets")), false);
 });
 
@@ -138,4 +137,24 @@ test("profile card is keyboard accessible", () => {
   assert.match(source, /role=["']link["']/);
   assert.match(source, /tabIndex=\{0\}/);
   assert.match(source, /onKeyDown=/);
+});
+
+test("builds a GitHub Pages static export", () => {
+  const nextConfig = fs.readFileSync(
+    path.join(root, "next.config.ts"),
+    "utf8",
+  );
+  assert.match(nextConfig, /output:\s*["']export["']/);
+  assert.match(nextConfig, /trailingSlash:\s*true/);
+  assert.equal(
+    fs.readFileSync(path.join(root, "public", "CNAME"), "utf8").trim(),
+    "wakaba.cc",
+  );
+
+  const workflow = fs.readFileSync(
+    path.join(root, "..", ".github", "workflows", "deploy-pages.yml"),
+    "utf8",
+  );
+  assert.match(workflow, /actions\/upload-pages-artifact/);
+  assert.match(workflow, /actions\/deploy-pages/);
 });
