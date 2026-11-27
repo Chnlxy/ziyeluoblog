@@ -395,3 +395,18 @@ test("uses the animated praying-girl GIF on the splash screen", () => {
   assert.match(splash, /object-contain/);
   assert.match(splash, /pixelated/);
 });
+
+test("does not render a glowing ring around the splash artwork", () => {
+  const splash = fs.readFileSync(
+    path.join(root, "components", "SplashScreen.tsx"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(splash, /splash-ring/);
+  assert.doesNotMatch(styles, /\.splash-ring/);
+  assert.doesNotMatch(styles, /@keyframes splash-spin/);
+});

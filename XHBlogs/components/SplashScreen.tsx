@@ -5,7 +5,6 @@ export default function SplashScreen() {
     <div className="splash-screen" aria-hidden="true">
       <div className="relative z-10 flex flex-col items-center">
         <div className="relative mb-8 h-32 w-32">
-          <div className="splash-ring absolute -inset-1.5 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-60 blur-[3px]" />
           <div className="relative h-full w-full rounded-full bg-white/95 p-1.5 shadow-xl dark:bg-slate-900">
             <img
               src={siteConfig.splashImageUrl}
