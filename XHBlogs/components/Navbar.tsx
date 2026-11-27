@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,15 +8,35 @@ import { siteConfig } from "../siteConfig";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
   const pathname = usePathname();
   const navLinks = siteConfig.navigation;
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (Math.abs(currentScrollY - lastScrollY) < 8) return;
+
+      setShowHeader(currentScrollY < 80 || currentScrollY < lastScrollY);
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 hidden border-b border-white/10 bg-[#171812]/65 shadow-lg backdrop-blur-2xl md:block">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 hidden border-b border-white/10 bg-[#171812]/95 shadow-lg backdrop-blur-2xl transition-transform duration-300 md:block ${
+          showHeader ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="mx-auto flex h-16 w-[90%] max-w-6xl items-center justify-between px-4">
           <Link
             href="/"

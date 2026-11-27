@@ -242,3 +242,13 @@ test("keeps the photo lightbox usable when the page is zoomed", () => {
   );
   assert.match(mobileBack, /pathname\.startsWith\(["']\/photowall["']\)/);
 });
+
+test("desktop navigation retracts while scrolling down", () => {
+  const navbar = fs.readFileSync(
+    path.join(root, "components", "Navbar.tsx"),
+    "utf8",
+  );
+  assert.match(navbar, /addEventListener\(["']scroll["']/);
+  assert.match(navbar, /bg-\[#171812\]\/95/);
+  assert.match(navbar, /-translate-y-full/);
+});
