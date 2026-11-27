@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant desktop (@media (min-width: 768px), @media (hover: hover) and (pointer: fine));
+@custom-variant desktop-wide (@media (min-width: 1024px), @media (hover: hover) and (pointer: fine));
 
 @theme {
   --color-indigo-300: #eadc9d;

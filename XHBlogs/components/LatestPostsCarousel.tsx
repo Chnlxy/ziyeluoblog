@@ -66,7 +66,7 @@ export default function LatestPostsCarousel({
         </motion.div>
       </AnimatePresence>
 
-      <div className="pointer-events-none relative z-10 flex min-h-[420px] flex-col justify-end p-6 md:p-8">
+      <div className="pointer-events-none relative z-10 flex min-h-[420px] flex-col justify-end p-6 desktop:p-8">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-indigo-500/85 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
             最新记录
@@ -77,7 +77,7 @@ export default function LatestPostsCarousel({
             </span>
           )}
         </div>
-        <h2 className="max-w-xl text-2xl font-black leading-tight text-white md:text-3xl">
+        <h2 className="max-w-xl text-2xl font-black leading-tight text-white desktop:text-3xl">
           {currentPost.title}
         </h2>
         <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-7 text-slate-200/85">

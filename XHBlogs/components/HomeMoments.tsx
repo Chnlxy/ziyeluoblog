@@ -4,7 +4,7 @@ import { formatContentDate } from "../lib/format";
 
 export default function HomeMoments({ moments }: { moments: MomentSummary[] }) {
   return (
-    <section className="glass-card p-6 md:p-7">
+    <section className="glass-card p-6 desktop:p-7">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">

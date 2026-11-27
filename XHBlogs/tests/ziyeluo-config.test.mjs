@@ -269,3 +269,30 @@ test("keeps the closed search below the desktop navigation", () => {
     /isOpen\s*\?\s*["']z-\[100\]["']\s*:\s*["']z-40["']/,
   );
 });
+
+test("keeps desktop navigation and layout on fine-pointer devices", () => {
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+  const navbar = fs.readFileSync(
+    path.join(root, "components", "Navbar.tsx"),
+    "utf8",
+  );
+  const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
+  const home = fs.readFileSync(path.join(root, "app", "page.tsx"), "utf8");
+
+  assert.match(
+    styles,
+    /@custom-variant desktop \(@media \(min-width: 768px\), @media \(hover: hover\) and \(pointer: fine\)\);/,
+  );
+  assert.match(
+    styles,
+    /@custom-variant desktop-wide \(@media \(min-width: 1024px\), @media \(hover: hover\) and \(pointer: fine\)\);/,
+  );
+  assert.match(navbar, /hidden .*desktop:block/);
+  assert.match(navbar, /desktop:hidden/);
+  assert.match(layout, /desktop:hidden/);
+  assert.equal((home.match(/desktop-wide:grid-cols-12/g) ?? []).length, 3);
+  assert.doesNotMatch(home, /\b(?:md|lg):/);
+});

@@ -25,11 +25,11 @@ export default function Home() {
       <Navbar />
 
       <PageTransition className="flex-1">
-        <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-24 sm:px-6 md:pt-28 lg:px-10">
+        <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-24 sm:px-6 desktop:pt-28 desktop-wide:px-10">
           <SearchBar posts={posts} />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-7">
+          <div className="grid grid-cols-1 gap-6 desktop-wide:grid-cols-12">
+            <div className="desktop-wide:col-span-7">
               <ProfileCard
                 postCount={posts.length}
                 chatterCount={moments.length}
@@ -37,7 +37,7 @@ export default function Home() {
               />
             </div>
 
-            <aside className="glass-card relative flex min-h-[230px] flex-col justify-between overflow-hidden p-6 md:p-8 lg:col-span-5">
+            <aside className="glass-card relative flex min-h-[230px] flex-col justify-between overflow-hidden p-6 desktop:p-8 desktop-wide:col-span-5">
               <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl" />
               <div className="relative z-10">
                 <p className="text-[10px] font-black uppercase tracking-[0.32em] text-indigo-300">
@@ -61,21 +61,21 @@ export default function Home() {
             </aside>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-5">
+          <div className="mt-6 grid grid-cols-1 gap-6 desktop-wide:grid-cols-12">
+            <div className="desktop-wide:col-span-5">
               <LatestPostsCarousel posts={posts.slice(0, 5)} />
             </div>
-            <div className="lg:col-span-7">
+            <div className="desktop-wide:col-span-7">
               <HomeGallery albums={albums} />
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-7">
+          <div className="mt-6 grid grid-cols-1 gap-6 desktop-wide:grid-cols-12">
+            <div className="desktop-wide:col-span-7">
               <HomeMoments moments={moments.slice(0, 3)} />
             </div>
 
-            <div className="grid gap-3 lg:col-span-5">
+            <div className="grid gap-3 desktop-wide:col-span-5">
               <Link
                 href="/friends"
                 className="glass-card group flex min-h-32 items-center justify-between p-6 transition hover:-translate-y-1 hover:border-indigo-300/25"
@@ -110,7 +110,7 @@ export default function Home() {
             </div>
           </div>
 
-          <footer className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 py-8 text-xs text-slate-500 md:flex-row">
+          <footer className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 py-8 text-xs text-slate-500 desktop:flex-row">
             <p>© {new Date().getFullYear()} {siteConfig.authorName}. 保留所有温柔。</p>
             <p>基于 Next.js 构建 · 上游许可署名已保留</p>
           </footer>

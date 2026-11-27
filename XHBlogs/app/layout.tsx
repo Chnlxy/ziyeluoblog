@@ -37,7 +37,7 @@ export default function RootLayout({
           >
             {children}
           </div>
-          <div className="md:hidden">
+          <div className="desktop:hidden">
             <MobileBackButton />
           </div>
         </ThemeProvider>
