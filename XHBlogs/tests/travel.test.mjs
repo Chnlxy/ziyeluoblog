@@ -308,7 +308,7 @@ test("shows markers only when they face the camera", () => {
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
 });
 
-test("keeps the marker fully opaque until its cap is completely hidden", () => {
+test("keeps the marker bright until the cap is almost hidden", () => {
   const markerBase = latLngToVector3([0, 0], 1.003);
   const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
   const visibilityAt = (x) =>
@@ -316,6 +316,9 @@ test("keeps the marker fully opaque until its cap is completely hidden", () => {
 
   assert.equal(visibilityAt(1), 1);
   assert.equal(visibilityAt(0.9), 1);
+  const finalFade = visibilityAt(0.885);
+  assert.ok(finalFade > 0 && finalFade < 1);
+  assert.equal(visibilityAt(0.88), 0);
   assert.equal(visibilityAt(0.87), 0);
   assert.equal(visibilityAt(0), 0);
   assert.equal(

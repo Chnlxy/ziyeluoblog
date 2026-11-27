@@ -365,6 +365,13 @@ export function markerHorizonVisibility(
   const cameraLength = Math.hypot(...cameraPosition);
   const centerHorizon = dot(cameraPosition, tipPosition) - 1;
   const capProjection = capRadius * cameraLength;
+  const fullyVisible = centerHorizon - capProjection;
+  const fullyHidden = centerHorizon + capProjection;
 
-  return centerHorizon + capProjection > 0 ? 1 : 0;
+  if (fullyHidden <= 0) return 0;
+  if (fullyVisible >= 0) return 1;
+
+  const remaining = fullyHidden / (fullyHidden - fullyVisible);
+  const amount = Math.min(1, remaining / 0.15);
+  return amount * amount * (3 - 2 * amount);
 }
