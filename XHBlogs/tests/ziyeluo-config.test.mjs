@@ -738,3 +738,28 @@ test("lays out footprint details without covering page text", () => {
   assert.doesNotMatch(panel, /fixed inset-x-3 bottom-3/);
   assert.doesNotMatch(panel, /document\.body\.style\.overflow = "hidden"/);
 });
+
+test("animates footprint layout transitions smoothly", () => {
+  const client = fs.readFileSync(
+    path.join(root, "app", "footprints", "FootprintsClient.tsx"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.match(client, /AnimatePresence/);
+  assert.match(client, /motion\.div/);
+  assert.match(client, /travel-detail-motion/);
+  assert.match(client, /height:\s*"auto"/);
+  assert.match(client, /duration:\s*0\.3/);
+  assert.match(
+    styles,
+    /transition:\s*grid-template-columns 300ms ease,\s*gap 300ms ease;/,
+  );
+  assert.match(
+    styles,
+    /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+0;/,
+  );
+});

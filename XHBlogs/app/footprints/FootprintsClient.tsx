@@ -2,6 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 import { CalendarDays, Images, MapPin, MousePointer2 } from "lucide-react";
 
 import TravelDetailPanel from "../../components/TravelDetailPanel";
@@ -92,6 +97,7 @@ function WebglFallback({
 }
 
 export default function FootprintsClient() {
+  const reducedMotion = useReducedMotion();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [webglState, setWebglState] = useState<
     "checking" | "supported" | "unsupported"
@@ -182,13 +188,31 @@ export default function FootprintsClient() {
                 />
               )}
             </section>
-            {selectedPlace && (
-              <TravelDetailPanel
-                key={selectedPlace.id}
-                place={selectedPlace}
-                onClose={closeDetail}
-              />
-            )}
+            <AnimatePresence initial={false}>
+              {selectedPlace && (
+                <motion.div
+                  key="travel-detail-motion"
+                  className="travel-detail-motion"
+                  initial={{ opacity: 0, y: 18, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: 18, height: 0 }}
+                  transition={
+                    reducedMotion
+                      ? { duration: 0 }
+                      : {
+                          duration: 0.3,
+                          ease: [0.22, 1, 0.36, 1],
+                        }
+                  }
+                >
+                  <TravelDetailPanel
+                    key={selectedPlace.id}
+                    place={selectedPlace}
+                    onClose={closeDetail}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </main>
