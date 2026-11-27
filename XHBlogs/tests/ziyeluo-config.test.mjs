@@ -201,8 +201,21 @@ test("adds the Shibuya Sky note to the matching travel photo", () => {
   );
   assert.match(
     albums,
-    /url:\s*["']\/images\/albums\/travel-silhouettes\/26\.webp["'],\s*caption:\s*["']涩谷sky["']/,
+    /url:\s*["']\/images\/albums\/travel-silhouettes\/26\.webp["'],\s*caption:\s*["']涩谷sky["'],\s*location:\s*\{[\s\S]*?name:\s*["']SHIBUYA SKY["'][\s\S]*?latitude:\s*35\.6581[\s\S]*?longitude:\s*139\.7016/,
   );
+});
+
+test("opens a tagged photo in Google Maps", () => {
+  const photoWall = fs.readFileSync(
+    path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
+    "utf8",
+  );
+
+  assert.match(photoWall, /selectedImage\.location/);
+  assert.match(photoWall, /https:\/\/www\.google\.com\/maps\/search\//);
+  assert.match(photoWall, /到这儿去/);
+  assert.match(photoWall, /target="_blank"/);
+  assert.match(photoWall, /rel="noopener noreferrer"/);
 });
 
 test("shows photo notes below the lightbox image", () => {
@@ -210,8 +223,8 @@ test("shows photo notes below the lightbox image", () => {
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
-  assert.match(photoWall, /className="mt-\[2dvh\][^"]*max-h-\[18dvh\]/);
-  assert.match(photoWall, /w-fit[^"]*max-w-\[calc\(100vw-2rem\)\]/);
+  assert.match(photoWall, /className="mt-\[2dvh\][^"]*flex-wrap/);
+  assert.match(photoWall, /className="max-h-\[18dvh\][^"]*max-w-\[calc\(100vw-2rem\)\]/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
 

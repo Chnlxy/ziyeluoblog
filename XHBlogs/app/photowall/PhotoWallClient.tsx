@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo } from 'react';
+import { MapPin } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import PageTransition from '../../components/PageTransition';
-import { albums, Album } from '../../data/albums';
+import { albums, Album, Photo } from '../../data/albums';
 
 export default function PhotoWallClient() {
   const [currentAlbum, setCurrentAlbum] = useState<Album | null>(null);
-  const [selectedImage, setSelectedImage] = useState<{url: string, caption?: string} | null>(null);
+  const [selectedImage, setSelectedImage] = useState<Photo | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -220,13 +221,29 @@ export default function PhotoWallClient() {
             />
           </div>
 
-          {selectedImage.caption && (
-            <p
-              className="mt-[2dvh] max-h-[18dvh] w-fit max-w-[calc(100vw-2rem)] shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
+          {(selectedImage.caption || selectedImage.location) && (
+            <div
+              className="mt-[2dvh] flex max-w-[calc(100vw-2rem)] shrink-0 flex-wrap items-start justify-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {selectedImage.caption}
-            </p>
+              {selectedImage.caption && (
+                <p className="max-h-[18dvh] w-fit max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm">
+                  {selectedImage.caption}
+                </p>
+              )}
+              {selectedImage.location && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${selectedImage.location.latitude},${selectedImage.location.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`在 Google 地图中打开${selectedImage.location.name}`}
+                  className="flex items-center gap-1.5 rounded-2xl border border-indigo-300/25 bg-indigo-500/20 px-4 py-2 text-xs font-bold text-indigo-100 shadow-2xl backdrop-blur-md transition hover:border-indigo-300/45 hover:bg-indigo-500/30 sm:px-5 sm:py-3 sm:text-sm"
+                >
+                  <MapPin size={14} />
+                  到这儿去
+                </a>
+              )}
+            </div>
           )}
         </div>
       )}

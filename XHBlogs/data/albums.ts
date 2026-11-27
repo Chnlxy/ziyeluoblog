@@ -1,6 +1,11 @@
 export interface Photo {
   url: string;
   caption?: string;
+  location?: {
+    name: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface Album {
@@ -100,7 +105,15 @@ export const albums: Album[] = [
       { url: "/images/albums/travel-silhouettes/23.webp" },
       { url: "/images/albums/travel-silhouettes/24.webp" },
       { url: "/images/albums/travel-silhouettes/25.webp" },
-      { url: "/images/albums/travel-silhouettes/26.webp", caption: "涩谷sky" },
+      {
+        url: "/images/albums/travel-silhouettes/26.webp",
+        caption: "涩谷sky",
+        location: {
+          name: "SHIBUYA SKY",
+          latitude: 35.6581,
+          longitude: 139.7016,
+        },
+      },
       { url: "/images/albums/travel-silhouettes/27.webp" },
     ],
   },
