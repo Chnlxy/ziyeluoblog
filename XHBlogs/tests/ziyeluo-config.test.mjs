@@ -331,3 +331,12 @@ test("generates a static detail page for every moment", () => {
   assert.match(list, /absolute inset-0 z-10/);
   assert.match(list, /relative z-20/);
 });
+
+test("reserves scrollbar space so the fixed background never shifts", () => {
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.match(styles, /html\s*\{[^}]*scrollbar-gutter:\s*stable;/s);
+});
