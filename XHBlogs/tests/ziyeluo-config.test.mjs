@@ -173,3 +173,23 @@ test("adds the travel silhouettes album with an empty state", () => {
   assert.match(photoWall, /currentAlbum\.photos\.length\s*===\s*0/);
   assert.match(photoWall, /这个相册还没有照片/);
 });
+
+test("publishes all selected travel photos", () => {
+  const albums = fs.readFileSync(
+    path.join(root, "data", "albums.ts"),
+    "utf8",
+  );
+  const start = albums.indexOf('id: "travel-silhouettes"');
+  assert.notEqual(start, -1);
+  const block = albums.slice(start, albums.indexOf("\n  },", start) + 5);
+  const photoUrls = [...block.matchAll(/url:\s*["'](\/images\/albums\/travel-silhouettes\/[^"']+)["']/g)]
+    .map((match) => match[1]);
+
+  assert.equal(photoUrls.length, 27);
+  for (const url of photoUrls) {
+    assert.ok(
+      fs.existsSync(path.join(root, "public", url)),
+      `${url} should exist`,
+    );
+  }
+});
