@@ -445,7 +445,7 @@ function Marker({
           document.body.style.cursor = "";
         }}
       >
-        <sphereGeometry args={[0.018, 16, 16]} />
+        <sphereGeometry args={[MARKER_CAP_RADIUS, 16, 16]} />
         <meshBasicMaterial
           ref={capMaterial}
           color={color}

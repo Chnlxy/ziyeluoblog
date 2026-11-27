@@ -359,13 +359,18 @@ export function markerHorizonVisibility(
 ) {
   const normal = normalize(markerPosition);
   const beamTipRadius = Math.hypot(...markerPosition) + beamTipOffset;
-  const cameraDepth = dot(normal, cameraPosition);
-  const outerHorizon = cameraDepth * (beamTipRadius + capRadius) - 1;
-  const innerHorizon = cameraDepth * (beamTipRadius - capRadius) - 1;
+  const tipPosition = normal.map(
+    (value) => value * beamTipRadius,
+  ) as [number, number, number];
+  const cameraLength = Math.hypot(...cameraPosition);
+  const centerHorizon = dot(cameraPosition, tipPosition) - 1;
+  const capProjection = capRadius * cameraLength;
+  const fullyVisible = centerHorizon - capProjection;
+  const fullyHidden = centerHorizon + capProjection;
 
-  if (outerHorizon <= 0) return 0;
-  if (innerHorizon >= 0) return 1;
+  if (fullyVisible >= 0) return 1;
+  if (fullyHidden <= 0) return 0;
 
-  const amount = outerHorizon / (outerHorizon - innerHorizon);
+  const amount = fullyHidden / (fullyHidden - fullyVisible);
   return amount * amount * (3 - 2 * amount);
 }

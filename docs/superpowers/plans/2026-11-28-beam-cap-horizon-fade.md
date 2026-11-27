@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 地标在光柱顶端完整可见时保持不透明，只在顶端球帽逐渐被地球遮挡时淡出，并在球帽完全不可见时精确变为透明。
+**Goal:** 地标在光柱顶端完整可见时保持不透明，只在顶端圆球逐渐被地球遮挡时淡出，并在圆球完全不可见时精确变为透明。
 
-**Architecture:** 把光柱顶端的发光小球视为具有半径的遮挡体。根据它朝向摄像机的外缘和内缘分别计算“开始被遮挡”和“完全被遮挡”两个地平线边界，在这两个边界之间做平滑过渡。
+**Architecture:** 把光柱顶端的发光小球视为具有真实半径的三维球体。利用摄像机位置与地球边缘切平面的距离，分别计算圆球“开始被遮挡”和“完全不可见”的边界，在这两个边界之间做平滑过渡。
 
 **Tech Stack:** TypeScript、Three.js、React Three Fiber、Node.js test runner
 
@@ -14,13 +14,14 @@
 
 - 光柱高度保持 `0.07`。
 - 顶端发光球半径保持 `0.018`。
-- 顶端完整可见时地标保持完全不透明。
-- 顶端完全不可见时地标可见度必须精确为 `0`。
+- 顶端圆球完整可见时地标保持完全不透明。
+- 顶端圆球哪怕仍有一部分可见，地标就不能完全消失。
+- 顶端圆球完全不可见时地标可见度必须精确为 `0`。
 - 标记缩放时，光柱长度和顶端球半径必须同步参与计算。
 
 ---
 
-### Task 1: 按顶端球帽的遮挡过程计算淡出
+### Task 1: 按顶端圆球的遮挡过程计算淡出
 
 **Files:**
 - Modify: `XHBlogs/lib/travel.ts:354-369`
@@ -35,16 +36,16 @@
 - [ ] **Step 1: 写会失败的行为测试**
 
 ```javascript
-test("fades only while the marker cap crosses the horizon", () => {
+test("keeps the marker visible while any part of its cap remains visible", () => {
   const markerBase = latLngToVector3([0, 0], 1.003);
   const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
   const visibilityAt = (x) =>
     markerHorizonVisibility(markerBase, cameraAt(x), 0.07, 0.018);
 
   assert.equal(visibilityAt(1), 1);
-  const partiallyHidden = visibilityAt(0.93);
+  const partiallyHidden = visibilityAt(0.9);
   assert.ok(partiallyHidden > 0 && partiallyHidden < 1);
-  assert.equal(visibilityAt(0.9), 0);
+  assert.equal(visibilityAt(0.87), 0);
   assert.equal(
     markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07, 0.018),
     0,
@@ -56,7 +57,7 @@ test("fades only while the marker cap crosses the horizon", () => {
 
 Run: `pnpm exec node --test --test-name-pattern="fades only while" tests/travel.test.mjs`
 
-Expected: FAIL；当前函数在 `x = 1` 时已经低于 `1`，并且 `x = 0.93` 时已经降到 `0`，说明它在顶端球帽仍部分可见时就提前淡出。
+Expected: FAIL；当前函数在 `x = 0.9` 时已经降到 `0`，但摄像机能看到的圆球靠近摄像机的一侧仍在球体地平线外，说明它在圆球仍部分可见时就提前消失。
 
 - [ ] **Step 3: 写最小实现**
 
@@ -69,14 +70,19 @@ export function markerHorizonVisibility(
 ) {
   const normal = normalize(markerPosition);
   const beamTipRadius = Math.hypot(...markerPosition) + beamTipOffset;
-  const cameraDepth = dot(normal, cameraPosition);
-  const outerHorizon = cameraDepth * (beamTipRadius + capRadius) - 1;
-  const innerHorizon = cameraDepth * (beamTipRadius - capRadius) - 1;
+  const tipPosition = normal.map(
+    (value) => value * beamTipRadius,
+  ) as [number, number, number];
+  const cameraLength = Math.hypot(...cameraPosition);
+  const centerHorizon = dot(cameraPosition, tipPosition) - 1;
+  const capProjection = capRadius * cameraLength;
+  const fullyVisible = centerHorizon - capProjection;
+  const fullyHidden = centerHorizon + capProjection;
 
-  if (outerHorizon <= 0) return 0;
-  if (innerHorizon >= 0) return 1;
+  if (fullyVisible >= 0) return 1;
+  if (fullyHidden <= 0) return 0;
 
-  const amount = outerHorizon / (outerHorizon - innerHorizon);
+  const amount = fullyHidden / (fullyHidden - fullyVisible);
   return amount * amount * (3 - 2 * amount);
 }
 ```
