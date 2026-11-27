@@ -98,6 +98,12 @@ function WebglFallback({
 
 export default function FootprintsClient() {
   const reducedMotion = useReducedMotion();
+  const motionTransition = reducedMotion
+    ? { duration: 0 }
+    : {
+        duration: 0.3,
+        ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+      };
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [webglState, setWebglState] = useState<
     "checking" | "supported" | "unsupported"
@@ -168,7 +174,9 @@ export default function FootprintsClient() {
               selectedPlace ? "footprints-layout--panel-open" : ""
             }`}
           >
-            <section className="glass-card relative min-h-[68dvh] overflow-hidden rounded-[2rem]">
+            <section
+              className="footprints-globe-stage glass-card relative min-h-[68dvh] overflow-hidden rounded-[2rem]"
+            >
               {webglState === "checking" ? (
                 <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
                   正在准备旅程……
@@ -196,14 +204,7 @@ export default function FootprintsClient() {
                   initial={{ opacity: 0, y: 18, height: 0 }}
                   animate={{ opacity: 1, y: 0, height: "auto" }}
                   exit={{ opacity: 0, y: 18, height: 0 }}
-                  transition={
-                    reducedMotion
-                      ? { duration: 0 }
-                      : {
-                          duration: 0.3,
-                          ease: [0.22, 1, 0.36, 1],
-                        }
-                  }
+                  transition={motionTransition}
                 >
                   <TravelDetailPanel
                     key={selectedPlace.id}

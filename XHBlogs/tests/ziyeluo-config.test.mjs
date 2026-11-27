@@ -729,10 +729,13 @@ test("lays out footprint details without covering page text", () => {
 
   assert.match(client, /footprints-layout/);
   assert.match(client, /footprints-layout--panel-open/);
-  assert.match(styles, /\.footprints-layout--panel-open\s*\{/);
   assert.match(
     styles,
-    /@media \(min-width: 1280px\)[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+390px;/,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-stage\s*\{/,
+  );
+  assert.match(
+    styles,
+    /@media \(min-width: 1280px\)[\s\S]*\.footprints-layout--panel-open\s+\.travel-detail-motion\s*\{[\s\S]*position:\s*absolute;/,
   );
   assert.match(panel, /className="travel-detail-panel/);
   assert.doesNotMatch(panel, /fixed inset-x-3 bottom-3/);
@@ -754,12 +757,20 @@ test("animates footprint layout transitions smoothly", () => {
   assert.match(client, /travel-detail-motion/);
   assert.match(client, /height:\s*"auto"/);
   assert.match(client, /duration:\s*0\.3/);
-  assert.match(
+  assert.doesNotMatch(
     styles,
-    /transition:\s*grid-template-columns 300ms ease,\s*gap 300ms ease;/,
+    /transition:\s*grid-template-columns/,
   );
   assert.match(
     styles,
-    /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+0;/,
+    /grid-template-columns:\s*minmax\(0,\s*1fr\);/,
+  );
+  assert.match(
+    styles,
+    /transition:\s*transform 300ms cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\);/,
+  );
+  assert.match(
+    styles,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-stage\s*\{[\s\S]*transform:\s*translateX\(-205px\)\s+scale\(0\.667\);/,
   );
 });
