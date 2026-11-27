@@ -572,3 +572,143 @@ test("protects guestbook moderation with an in-site password login", () => {
   assert.match(client, /\/api\/admin\/logout/);
   assert.match(packageJson.scripts["admin:hash"], /hash-admin-password/);
 });
+
+test("ships a real 3D travel globe with local earth textures", () => {
+  const globePath = path.join(root, "components", "TravelGlobe.tsx");
+  const dayTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-day.jpg",
+  );
+  const nightTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-night.jpg",
+  );
+  const mobileDayTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-day-mobile.jpg",
+  );
+  const mobileNightTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-night-mobile.jpg",
+  );
+
+  assert.ok(fs.existsSync(globePath));
+  assert.ok(fs.existsSync(dayTexture));
+  assert.ok(fs.existsSync(nightTexture));
+  assert.ok(fs.existsSync(mobileDayTexture));
+  assert.ok(fs.existsSync(mobileNightTexture));
+  assert.ok(fs.statSync(dayTexture).size < 3 * 1024 * 1024);
+  assert.ok(fs.statSync(nightTexture).size < 3 * 1024 * 1024);
+  assert.ok(fs.statSync(mobileDayTexture).size < 900 * 1024);
+  assert.ok(fs.statSync(mobileNightTexture).size < 900 * 1024);
+
+  const globe = fs.readFileSync(globePath, "utf8");
+  assert.match(globe, /@react-three\/fiber/);
+  assert.match(globe, /solarDirection/);
+  assert.match(globe, /earth-day\.jpg/);
+  assert.match(globe, /earth-night\.jpg/);
+  assert.match(globe, /earth-day-mobile\.jpg/);
+  assert.match(globe, /earth-night-mobile\.jpg/);
+  assert.match(globe, /aria-label="旅行足迹地球"/);
+  assert.doesNotMatch(globe, /\bHtml\b/);
+  assert.match(globe, /CanvasTexture/);
+  assert.match(globe, /aria-label="地点列表"/);
+  assert.match(globe, /#include <tonemapping_fragment>/);
+  assert.match(globe, /#include <colorspace_fragment>/);
+  assert.doesNotMatch(globe, /https:\/\/unpkg\.com/);
+});
+
+test("adds the footprints route and travel detail panel", () => {
+  const config = fs.readFileSync(path.join(root, "siteConfig.ts"), "utf8");
+  const pagePath = path.join(root, "app", "footprints", "page.tsx");
+  const clientPath = path.join(
+    root,
+    "app",
+    "footprints",
+    "FootprintsClient.tsx",
+  );
+  const panelPath = path.join(root, "components", "TravelDetailPanel.tsx");
+
+  assert.match(config, /name:\s*"足迹"/);
+  assert.match(config, /href:\s*"\/footprints"/);
+  assert.ok(fs.existsSync(pagePath));
+  assert.ok(fs.existsSync(clientPath));
+  assert.ok(fs.existsSync(panelPath));
+
+  const client = fs.readFileSync(clientPath, "utf8");
+  const panel = fs.readFileSync(panelPath, "utf8");
+  assert.match(client, /TravelGlobe/);
+  assert.match(client, /TravelDetailPanel/);
+  assert.match(client, /selectedId/);
+  assert.match(panel, /role="dialog"/);
+  assert.match(panel, /event\.key === "Escape"/);
+  assert.match(panel, /MomentImageLightbox/);
+  assert.doesNotMatch(panel, /aria-modal="true"/);
+  assert.doesNotMatch(panel, /fixed inset-0 z-\[70\]/);
+});
+
+test("detects WebGL once outside render and manages modal focus", () => {
+  const client = fs.readFileSync(
+    path.join(root, "app", "footprints", "FootprintsClient.tsx"),
+    "utf8",
+  );
+  const panel = fs.readFileSync(
+    path.join(root, "components", "TravelDetailPanel.tsx"),
+    "utf8",
+  );
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+  const webgl = fs.readFileSync(
+    path.join(root, "lib", "webgl.ts"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(client, /useSyncExternalStore/);
+  assert.match(client, /useEffect/);
+  assert.match(client, /detectWebglSupport/);
+  assert.match(client, /cachedWebglSupport/);
+  assert.match(webgl, /WEBGL_lose_context/);
+  assert.match(webgl, /loseContext/);
+
+  assert.match(panel, /panelRef/);
+  assert.match(panel, /lightboxIndexRef/);
+  assert.doesNotMatch(panel, /event\.key\s*!==\s*"Tab"/);
+  assert.match(panel, /\.focus\(\)/);
+  assert.match(globe, /data-place-id/);
+  assert.match(client, /data-place-id/);
+  assert.match(client, /data-place-id=/);
+  assert.match(client, /\.focus\(\)/);
+  assert.match(client, /requestAnimationFrame/);
+  assert.match(globe, /focusedPlaceId/);
+  assert.match(globe, /onFocus/);
+  assert.match(globe, /IntersectionObserver/);
+  assert.match(globe, /正在加载地球纹理/);
+  assert.doesNotMatch(globe, /setFrontFacing/);
+});
+
+test("keeps a fading route during destination switches", () => {
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+
+  assert.match(globe, /outgoingRoute/);
+  assert.match(globe, /fading/);
+  assert.match(globe, /routeFadeOpacity/);
+  assert.match(globe, /setOutgoingRoute/);
+  assert.match(globe, /useLayoutEffect/);
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export default function MomentImageLightbox({
@@ -8,13 +8,27 @@ export default function MomentImageLightbox({
   index,
   onClose,
   onChange,
+  ariaLabel = "查看图片",
 }: {
   images: string[];
   index: number;
   onClose: () => void;
   onChange: (index: number) => void;
+  ariaLabel?: string;
 }) {
   const current = Math.min(Math.max(index, 0), Math.max(images.length - 1, 0));
+  const closeButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const previousFocus =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    closeButton.current?.focus();
+    return () => {
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, []);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -44,13 +58,14 @@ export default function MomentImageLightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="查看说说图片"
+      aria-label={ariaLabel}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
       className="fixed inset-0 z-[100000] flex h-dvh items-center justify-center bg-black/95 p-4 backdrop-blur-xl"
     >
       <button
+        ref={closeButton}
         type="button"
         aria-label="关闭图片"
         onClick={onClose}
