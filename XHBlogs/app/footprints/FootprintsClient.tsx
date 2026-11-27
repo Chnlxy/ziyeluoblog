@@ -175,26 +175,32 @@ export default function FootprintsClient() {
             }`}
           >
             <section
-              className="footprints-globe-stage glass-card relative min-h-[68dvh] overflow-hidden rounded-[2rem]"
+              className="footprints-globe-stage relative min-h-[68dvh] overflow-hidden rounded-[2rem]"
             >
-              {webglState === "checking" ? (
-                <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
-                  正在准备旅程……
-                </div>
-              ) : webglState === "supported" ? (
-                <div className="h-[68dvh] min-h-[520px]">
-                  <TravelGlobe
-                    places={travelPlaces}
-                    selectedId={selectedId}
+              <div
+                aria-hidden="true"
+                className="footprints-globe-backdrop glass-card"
+              />
+              <div className="relative z-10">
+                {webglState === "checking" ? (
+                  <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
+                    正在准备旅程……
+                  </div>
+                ) : webglState === "supported" ? (
+                  <div className="h-[68dvh] min-h-[520px]">
+                    <TravelGlobe
+                      places={travelPlaces}
+                      selectedId={selectedId}
+                      onSelect={selectPlace}
+                    />
+                  </div>
+                ) : (
+                  <WebglFallback
+                    places={fallbackPlaces}
                     onSelect={selectPlace}
                   />
-                </div>
-              ) : (
-                <WebglFallback
-                  places={fallbackPlaces}
-                  onSelect={selectPlace}
-                />
-              )}
+                )}
+              </div>
             </section>
             <AnimatePresence initial={false}>
               {selectedPlace && (
