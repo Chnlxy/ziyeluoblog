@@ -24,7 +24,7 @@ const TravelGlobe = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
+      <div className="flex h-[68dvh] min-h-[520px] items-center justify-center text-sm text-slate-300">
         正在展开地球……
       </div>
     ),
@@ -183,7 +183,7 @@ export default function FootprintsClient() {
               />
               <div className="footprints-globe-content relative z-10">
                 {webglState === "checking" ? (
-                  <div className="flex min-h-[68dvh] items-center justify-center text-sm text-slate-300">
+                  <div className="flex h-[68dvh] min-h-[520px] items-center justify-center text-sm text-slate-300">
                     正在准备旅程……
                   </div>
                 ) : webglState === "supported" ? (

@@ -756,6 +756,29 @@ test("lays out footprint details without covering page text", () => {
   assert.doesNotMatch(panel, /document\.body\.style\.overflow = "hidden"/);
 });
 
+test("keeps footprints content vertically fixed during entry", () => {
+  const transition = fs.readFileSync(
+    path.join(root, "components", "PageTransition.tsx"),
+    "utf8",
+  );
+  const footprints = fs.readFileSync(
+    path.join(root, "app", "footprints", "page.tsx"),
+    "utf8",
+  );
+  const client = fs.readFileSync(
+    path.join(root, "app", "footprints", "FootprintsClient.tsx"),
+    "utf8",
+  );
+
+  assert.match(transition, /offsetY\?:\s*number/);
+  assert.match(transition, /initial=\{\{\s*y:\s*offsetY/);
+  assert.match(footprints, /<PageTransition[^>]*offsetY=\{0\}/);
+  assert.equal(
+    (client.match(/min-h-\[520px\]/g) ?? []).length,
+    3,
+  );
+});
+
 test("animates footprint layout transitions smoothly", () => {
   const client = fs.readFileSync(
     path.join(root, "app", "footprints", "FootprintsClient.tsx"),

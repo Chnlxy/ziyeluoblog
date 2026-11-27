@@ -14,7 +14,7 @@ export default function FootprintsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <PageTransition className="flex-1">
+      <PageTransition className="flex-1" offsetY={0}>
         <FootprintsClient />
       </PageTransition>
     </div>
