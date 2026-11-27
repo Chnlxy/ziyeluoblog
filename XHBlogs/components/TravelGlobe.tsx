@@ -30,7 +30,8 @@ const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-mobile.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-mobile.jpg";
-const MARKER_BEAM_HEIGHT = 0.13;
+const MARKER_BEAM_HEIGHT = 0.07;
+const MARKER_SURFACE_RADIUS = 1.003;
 
 const vertexShader = `
   varying vec2 vUv;
@@ -654,7 +655,7 @@ function TravelScene({
         id="hangzhou"
         label="杭州 · 起点"
         coordinates={[...hangzhouHome.coordinates]}
-        radius={1.028}
+        radius={MARKER_SURFACE_RADIUS}
         selected={false}
         focused={false}
         selectable={false}
@@ -665,7 +666,7 @@ function TravelScene({
           id={place.id}
           label={`${place.name} · ${place.country}`}
           coordinates={place.coordinates}
-          radius={1.025}
+          radius={MARKER_SURFACE_RADIUS}
           selected={place.id === selectedId}
           focused={place.id === focusedId}
           selectable

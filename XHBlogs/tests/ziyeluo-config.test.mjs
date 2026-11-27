@@ -627,6 +627,12 @@ test("ships a real 3D travel globe with local earth textures", () => {
   assert.match(globe, /markerHorizonVisibility/);
   assert.match(globe, /cylinderGeometry/);
   assert.match(globe, /MARKER_BEAM_HEIGHT/);
+  assert.match(globe, /const MARKER_BEAM_HEIGHT = 0\.07;/);
+  assert.match(globe, /const MARKER_SURFACE_RADIUS = 1\.003;/);
+  assert.equal(
+    (globe.match(/radius=\{MARKER_SURFACE_RADIUS\}/g) ?? []).length,
+    2,
+  );
   assert.match(globe, /labelMaterial/);
   assert.doesNotMatch(
     globe,
