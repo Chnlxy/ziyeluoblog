@@ -28,7 +28,7 @@ export default function ProfileCard({ postCount, chatterCount, photoCount }: { p
       <div className="flex items-start justify-between relative z-10">
         <div className="flex items-center gap-4 desktop:gap-6 w-full">
           <div className="w-16 h-16 sm:w-20 sm:h-20 desktop:w-24 desktop:h-24 rounded-xl desktop:rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 p-1 shadow-lg flex-shrink-0 transition-transform duration-500 group-hover:rotate-3">
-            <img src={siteConfig.avatarUrl} alt="avatar" className="w-full h-full rounded-lg desktop:rounded-xl object-cover bg-white" />
+            <img src={siteConfig.homeAvatarUrl} alt="avatar" className="w-full h-full rounded-lg desktop:rounded-xl object-cover bg-white" />
           </div>
           <div className="flex-1 min-w-0">
             {/* 🌟 核心修复点：
