@@ -410,3 +410,15 @@ test("does not render a glowing ring around the splash artwork", () => {
   assert.doesNotMatch(styles, /\.splash-ring/);
   assert.doesNotMatch(styles, /@keyframes splash-spin/);
 });
+
+test("shows the splash background behind the GIF", () => {
+  const splash = fs.readFileSync(
+    path.join(root, "components", "SplashScreen.tsx"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(splash, /bg-white\/95/);
+  assert.doesNotMatch(splash, /dark:bg-slate-900/);
+  assert.doesNotMatch(splash, /shadow-xl/);
+  assert.match(splash, /bg-transparent/);
+});

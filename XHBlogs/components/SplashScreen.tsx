@@ -5,12 +5,12 @@ export default function SplashScreen() {
     <div className="splash-screen" aria-hidden="true">
       <div className="relative z-10 flex flex-col items-center">
         <div className="relative mb-8 h-32 w-32">
-          <div className="relative h-full w-full rounded-full bg-white/95 p-1.5 shadow-xl dark:bg-slate-900">
+          <div className="relative h-full w-full bg-transparent">
             <img
               src={siteConfig.splashImageUrl}
               alt=""
               fetchPriority="high"
-              className="h-full w-full rounded-full object-contain [image-rendering:pixelated]"
+              className="h-full w-full object-contain [image-rendering:pixelated]"
             />
           </div>
         </div>
