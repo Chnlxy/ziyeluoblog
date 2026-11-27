@@ -11,6 +11,7 @@ export const siteConfig = {
   navAfter: "幻想郷",
 
   avatarUrl: "/avatar-placeholder.svg",
+  splashImageUrl: "/images/splash-praying-girl.gif",
 
   useGradient: false,
   themeColors: ["#d6c160", "#98733b", "#8d9a83", "#2c2a23"],

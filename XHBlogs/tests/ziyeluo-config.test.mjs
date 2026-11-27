@@ -372,3 +372,26 @@ test("uses the praying maiden loading label in the splash screen", () => {
   assert.match(styles, /\.splash-dot\s*\{/);
   assert.match(styles, /@keyframes splash-dot/);
 });
+
+test("uses the animated praying-girl GIF on the splash screen", () => {
+  const config = fs.readFileSync(path.join(root, "siteConfig.ts"), "utf8");
+  const splash = fs.readFileSync(
+    path.join(root, "components", "SplashScreen.tsx"),
+    "utf8",
+  );
+  const asset = path.join(
+    root,
+    "public",
+    "images",
+    "splash-praying-girl.gif",
+  );
+
+  assert.match(
+    config,
+    /splashImageUrl:\s*"\/images\/splash-praying-girl\.gif"/,
+  );
+  assert.ok(fs.existsSync(asset));
+  assert.match(splash, /siteConfig\.splashImageUrl/);
+  assert.match(splash, /object-contain/);
+  assert.match(splash, /pixelated/);
+});
