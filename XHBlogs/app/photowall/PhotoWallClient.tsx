@@ -199,28 +199,30 @@ export default function PhotoWallClient() {
 
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] flex min-h-dvh cursor-zoom-out flex-col items-center justify-start gap-3 overflow-y-auto overscroll-contain bg-black/95 px-3 pb-6 pt-16 backdrop-blur-2xl animate-fade-in sm:justify-center sm:p-8"
+          className="fixed inset-0 z-[100] flex h-dvh w-screen cursor-zoom-out flex-col overflow-hidden overscroll-contain bg-black/95 px-[3vw] pb-[3dvh] pt-[clamp(1rem,8dvh,4rem)] backdrop-blur-2xl animate-fade-in"
           onClick={() => setSelectedImage(null)}
         >
           <button
             type="button"
             aria-label="关闭照片"
             onClick={() => setSelectedImage(null)}
-            className="fixed right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white sm:right-6 sm:top-6 sm:h-12 sm:w-12"
+            className="fixed right-[2vw] top-[2dvh] flex h-[clamp(1.75rem,6vw,3rem)] w-[clamp(1.75rem,6vw,3rem)] items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
           >
-            <svg className="h-4 w-4 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg className="h-1/2 w-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
-          <img
-            src={selectedImage.url}
-            alt={selectedImage.caption || '全屏照片'}
-            className="max-h-[calc(100dvh-8rem)] max-w-[calc(100vw-2rem)] shrink-0 rounded-lg object-contain shadow-2xl sm:max-h-[calc(100dvh-10rem)] sm:max-w-[calc(100vw-8rem)]"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.caption || '全屏照片'}
+              className="max-h-full max-w-full shrink-0 rounded-lg object-contain shadow-2xl sm:max-w-[calc(100vw-8rem)]"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
 
           {selectedImage.caption && (
             <p
-              className="mt-3 max-h-[20dvh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:mt-5 sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
+              className="mt-[2dvh] max-h-[18dvh] w-full max-w-[calc(100vw-2rem)] shrink-0 overflow-y-auto rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-center text-xs font-medium tracking-wide text-white shadow-2xl backdrop-blur-md sm:max-w-2xl sm:px-6 sm:py-3 sm:text-sm"
               onClick={(e) => e.stopPropagation()}
             >
               {selectedImage.caption}

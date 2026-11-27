@@ -210,7 +210,7 @@ test("shows photo notes below the lightbox image", () => {
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
-  assert.match(photoWall, /className="mt-3[^"]*sm:mt-5/);
+  assert.match(photoWall, /className="mt-\[2dvh\][^"]*max-h-\[18dvh\]/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
 
@@ -227,9 +227,11 @@ test("keeps the photo lightbox usable when the page is zoomed", () => {
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
-  assert.match(photoWall, /overflow-y-auto overscroll-contain/);
-  assert.match(photoWall, /max-h-\[calc\(100dvh-8rem\)\]/);
-  assert.match(photoWall, /max-w-\[calc\(100vw-2rem\)\]/);
+  assert.match(photoWall, /fixed inset-0 z-\[100\][^"]*h-dvh/);
+  assert.match(photoWall, /flex min-h-0[^"]*flex-1/);
+  assert.match(photoWall, /max-h-full max-w-full/);
+  assert.match(photoWall, /max-h-\[18dvh\]/);
+  assert.match(photoWall, /clamp\(1\.75rem,6vw,3rem\)/);
 
   const mobileBack = fs.readFileSync(
     path.join(root, "components", "MobileBackButton.tsx"),
