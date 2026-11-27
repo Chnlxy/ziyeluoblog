@@ -759,7 +759,10 @@ export default function TravelGlobe({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative h-full w-full">
+    <div
+      ref={containerRef}
+      className="relative h-full w-full overflow-hidden rounded-[2rem]"
+    >
       <Canvas
         className={`globe-canvas ${
           texturesReady ? "globe-canvas--ready" : "opacity-0"

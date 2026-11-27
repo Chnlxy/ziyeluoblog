@@ -205,17 +205,27 @@ test("adds the Shibuya Sky note to the matching travel photo", () => {
   );
 });
 
-test("opens a tagged photo in Google Maps", () => {
+test("opens a tagged footprints photo in Google Maps", () => {
   const photoWall = fs.readFileSync(
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
+  const panel = fs.readFileSync(
+    path.join(root, "components", "TravelDetailPanel.tsx"),
+    "utf8",
+  );
+  const lightbox = fs.readFileSync(
+    path.join(root, "components", "MomentImageLightbox.tsx"),
+    "utf8",
+  );
 
-  assert.match(photoWall, /selectedImage\.location/);
-  assert.match(photoWall, /https:\/\/www\.google\.com\/maps\/search\//);
-  assert.match(photoWall, /到这儿去/);
-  assert.match(photoWall, /target="_blank"/);
-  assert.match(photoWall, /rel="noopener noreferrer"/);
+  assert.doesNotMatch(photoWall, /到这儿去/);
+  assert.match(panel, /photoMetadata|metadata=/);
+  assert.match(panel, /https:\/\/www\.google\.com\/maps\/search\//);
+  assert.match(lightbox, /metadata/);
+  assert.match(lightbox, /到这儿去/);
+  assert.match(lightbox, /target="_blank"/);
+  assert.match(lightbox, /rel="noopener noreferrer"/);
 });
 
 test("shows photo notes below the lightbox image", () => {
@@ -223,8 +233,8 @@ test("shows photo notes below the lightbox image", () => {
     path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
     "utf8",
   );
-  assert.match(photoWall, /className="mt-\[2dvh\][^"]*flex-wrap/);
-  assert.match(photoWall, /className="max-h-\[18dvh\][^"]*max-w-\[calc\(100vw-2rem\)\]/);
+  assert.match(photoWall, /className="mt-\[2dvh\][^"]*max-h-\[18dvh\]/);
+  assert.match(photoWall, /w-fit[^"]*max-w-\[calc\(100vw-2rem\)\]/);
   assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
 });
 
@@ -871,10 +881,14 @@ test("animates footprint layout transitions smoothly", () => {
   );
   assert.match(
     styles,
-    /\.footprints-globe-content\s*\{[^}]*transition:\s*transform 300ms cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\);/,
+    /\.footprints-globe-content\s*\{[^}]*transition:[\s\S]*?transform 300ms cubic-bezier\(0\.22,\s*1,\s*0\.36,\s*1\),[\s\S]*?clip-path 300ms/,
   );
   assert.match(
     styles,
     /\.footprints-layout--panel-open\s+\.footprints-globe-content\s*\{[\s\S]*transform:\s*translateX\(-102\.5px\);/,
+  );
+  assert.match(
+    styles,
+    /\.footprints-layout--panel-open\s+\.footprints-globe-content\s*\{[\s\S]*clip-path:\s*inset\(0\s+102\.5px\s+0\s+102\.5px\s+round\s+2rem\);/,
   );
 });

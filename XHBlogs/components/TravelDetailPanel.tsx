@@ -9,11 +9,14 @@ import {
 } from "react";
 import { CalendarDays, Images, MapPin, X } from "lucide-react";
 
+import { albums } from "../data/albums";
 import {
   formatTravelVisitRange,
   type TravelPlace,
 } from "../lib/travel";
-import MomentImageLightbox from "./MomentImageLightbox";
+import MomentImageLightbox, {
+  type ImageLightboxMetadata,
+} from "./MomentImageLightbox";
 
 export default function TravelDetailPanel({
   place,
@@ -39,6 +42,23 @@ export default function TravelDetailPanel({
       sortedVisits.flatMap((visit) => visit.photos),
     [sortedVisits],
   );
+  const photoMetadata = useMemo<ImageLightboxMetadata[]>(() => {
+    const albumPhotos = new Map(
+      albums.flatMap((album) =>
+        album.photos.map((photo) => [photo.url, photo] as const),
+      ),
+    );
+    return photos.map((src) => {
+      const photo = albumPhotos.get(src);
+      return {
+        caption: photo?.caption,
+        mapUrl: photo?.location
+          ? `https://www.google.com/maps/search/?api=1&query=${photo.location.latitude},${photo.location.longitude}`
+          : undefined,
+        mapLabel: photo?.location?.name,
+      };
+    });
+  }, [photos]);
 
   useEffect(() => {
     const focusFrame = window.requestAnimationFrame(() => {
@@ -173,6 +193,7 @@ export default function TravelDetailPanel({
           onClose={closeLightbox}
           onChange={changeLightbox}
           ariaLabel={`查看${place.name}旅行照片`}
+          metadata={photoMetadata}
         />
       )}
     </>

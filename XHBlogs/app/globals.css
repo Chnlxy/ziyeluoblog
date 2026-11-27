@@ -169,8 +169,11 @@
 }
 
 .footprints-globe-content {
+  clip-path: inset(0 0 0 0 round 2rem);
   transform: translateX(0);
-  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    clip-path 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .globe-canvas {
@@ -217,6 +220,7 @@
   }
 
   .footprints-layout--panel-open .footprints-globe-content {
+    clip-path: inset(0 102.5px 0 102.5px round 2rem);
     transform: translateX(-102.5px);
   }
 

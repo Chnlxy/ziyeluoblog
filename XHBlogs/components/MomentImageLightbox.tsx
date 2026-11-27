@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, X } from "lucide-react";
+
+export interface ImageLightboxMetadata {
+  caption?: string;
+  mapUrl?: string;
+  mapLabel?: string;
+}
 
 export default function MomentImageLightbox({
   images,
@@ -9,14 +15,17 @@ export default function MomentImageLightbox({
   onClose,
   onChange,
   ariaLabel = "查看图片",
+  metadata,
 }: {
   images: string[];
   index: number;
   onClose: () => void;
   onChange: (index: number) => void;
   ariaLabel?: string;
+  metadata?: Array<ImageLightboxMetadata | undefined>;
 }) {
   const current = Math.min(Math.max(index, 0), Math.max(images.length - 1, 0));
+  const currentMetadata = metadata?.[current];
   const closeButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -97,14 +106,35 @@ export default function MomentImageLightbox({
         </>
       )}
 
-      <img
-        src={images[current]}
-        alt=""
-        className="max-h-[85dvh] max-w-full rounded-2xl object-contain shadow-2xl"
-      />
-      <p className="absolute bottom-6 rounded-full bg-white/10 px-4 py-2 text-xs text-white">
-        {current + 1} / {images.length}
-      </p>
+      <div className="flex min-h-0 w-full flex-col items-center justify-center gap-3 sm:flex-row">
+        <img
+          src={images[current]}
+          alt=""
+          className="max-h-[76dvh] max-w-full rounded-2xl object-contain shadow-2xl sm:max-h-[85dvh] sm:max-w-[calc(100vw-14rem)]"
+        />
+        {currentMetadata?.mapUrl && (
+          <a
+            href={currentMetadata.mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`在 Google 地图中打开${currentMetadata.mapLabel || "这个地点"}`}
+            className="flex shrink-0 items-center gap-2 rounded-full border border-indigo-300/25 bg-indigo-500/20 px-5 py-3 text-sm font-bold text-indigo-100 shadow-2xl backdrop-blur-md transition hover:border-indigo-300/45 hover:bg-indigo-500/30"
+          >
+            <MapPin size={16} />
+            到这儿去
+          </a>
+        )}
+      </div>
+      <div className="absolute bottom-5 flex max-w-[calc(100vw-2rem)] flex-wrap items-center justify-center gap-2">
+        {currentMetadata?.caption && (
+          <p className="max-h-[14dvh] overflow-y-auto rounded-full border border-white/10 bg-white/10 px-4 py-2 text-center text-xs text-white backdrop-blur-md">
+            {currentMetadata.caption}
+          </p>
+        )}
+        <p className="rounded-full bg-white/10 px-4 py-2 text-xs text-white">
+          {current + 1} / {images.length}
+        </p>
+      </div>
     </div>
   );
 }
