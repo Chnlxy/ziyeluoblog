@@ -38,7 +38,7 @@ export const siteConfig = {
     { name: "归档", href: "/timeline" },
     { name: "照片墙", href: "/photowall" },
     { name: "说说", href: "/moments" },
-    { name: "友链", href: "/friends" },
+    { name: "留言", href: "/guestbook" },
     { name: "关于", href: "/about" },
   ],
 

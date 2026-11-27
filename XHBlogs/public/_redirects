@@ -1,0 +1,2 @@
+/friends /guestbook/ 301
+/friends/* /guestbook/ 301

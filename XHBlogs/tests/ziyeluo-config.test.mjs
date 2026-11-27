@@ -13,7 +13,7 @@ test("uses the confirmed site identity", () => {
 });
 
 test("enables only the first-version navigation", () => {
-  for (const label of ["首页", "归档", "照片墙", "说说", "友链", "关于"]) {
+  for (const label of ["首页", "归档", "照片墙", "说说", "留言", "关于"]) {
     assert.match(config, new RegExp(`name:\\s*"${label}"`));
   }
 
@@ -99,7 +99,6 @@ test("removes upstream private profile copy from active content", () => {
       .map((file) => path.join(root, "moments", file)),
     path.join(root, "app", "about", "about.md"),
     path.join(root, "data", "albums.ts"),
-    path.join(root, "data", "friends.ts"),
   ];
   const text = contentFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
 
@@ -434,4 +433,142 @@ test("uses the homepage illustration as the shared site avatar", () => {
   assert.doesNotMatch(config, /homeAvatarUrl/);
   assert.match(profile, /siteConfig\.avatarUrl/);
   assert.doesNotMatch(profile, /siteConfig\.homeAvatarUrl/);
+});
+
+test("replaces friend links with the anonymous guestbook", () => {
+  const config = fs.readFileSync(path.join(root, "siteConfig.ts"), "utf8");
+  const guestbookPath = path.join(root, "app", "guestbook", "page.tsx");
+  const clientPath = path.join(
+    root,
+    "app",
+    "guestbook",
+    "GuestbookClient.tsx",
+  );
+  const redirectsPath = path.join(root, "public", "_redirects");
+
+  assert.match(config, /name:\s*"留言"/);
+  assert.match(config, /href:\s*"\/guestbook"/);
+  assert.ok(fs.existsSync(guestbookPath));
+  assert.ok(fs.existsSync(clientPath));
+  assert.ok(fs.existsSync(redirectsPath));
+  assert.equal(
+    fs.existsSync(path.join(root, "app", "friends", "page.tsx")),
+    false,
+  );
+});
+
+test("ships a moderated public guestbook API", () => {
+  const apiPath = path.join(root, "functions", "api", "guestbook.ts");
+  const schemaPath = path.join(root, "functions", "schema.sql");
+
+  assert.ok(fs.existsSync(apiPath));
+  assert.ok(fs.existsSync(schemaPath));
+  const api = fs.readFileSync(apiPath, "utf8");
+  const schema = fs.readFileSync(schemaPath, "utf8");
+
+  assert.match(api, /status\s*=\s*'approved'/);
+  assert.match(api, /"pending"/);
+  assert.match(api, /TURNSTILE_SECRET_KEY/);
+  assert.match(api, /RATE_LIMIT_SECRET/);
+  assert.match(schema, /CHECK \(status IN \('pending', 'approved', 'hidden'\)\)/);
+});
+
+test("protects guestbook moderation with a password session", () => {
+  const authPath = path.join(root, "functions", "_lib", "admin-auth.mjs");
+  const loginPath = path.join(root, "functions", "api", "admin", "login.ts");
+  const sessionPath = path.join(
+    root,
+    "functions",
+    "api",
+    "admin",
+    "session.ts",
+  );
+  const logoutPath = path.join(root, "functions", "api", "admin", "logout.ts");
+  const adminApiPath = path.join(
+    root,
+    "functions",
+    "api",
+    "admin",
+    "guestbook.ts",
+  );
+  const adminItemPath = path.join(
+    root,
+    "functions",
+    "api",
+    "admin",
+    "guestbook",
+    "[id].ts",
+  );
+
+  assert.ok(fs.existsSync(authPath));
+  assert.ok(fs.existsSync(loginPath));
+  assert.ok(fs.existsSync(sessionPath));
+  assert.ok(fs.existsSync(logoutPath));
+  assert.ok(fs.existsSync(adminApiPath));
+  assert.ok(fs.existsSync(adminItemPath));
+  const auth = fs.readFileSync(authPath, "utf8");
+  const adminApi = fs.readFileSync(adminApiPath, "utf8");
+  const adminItem = fs.readFileSync(adminItemPath, "utf8");
+
+  assert.match(auth, /ADMIN_SESSION_SECRET/);
+  assert.match(auth, /HttpOnly/);
+  assert.match(adminApi, /requireAdminSession/);
+  assert.match(adminItem, /requireAdminSession/);
+  assert.match(adminItem, /validateModerationStatus/);
+  assert.doesNotMatch(adminApi, /ACCESS_TEAM_DOMAIN|ACCESS_AUD/);
+  assert.equal(
+    fs.existsSync(path.join(root, "functions", "_lib", "access.mjs")),
+    false,
+  );
+});
+
+test("ships guestbook moderation controls", () => {
+  const pagePath = path.join(
+    root,
+    "app",
+    "admin",
+    "guestbook",
+    "page.tsx",
+  );
+  const clientPath = path.join(
+    root,
+    "app",
+    "admin",
+    "guestbook",
+    "AdminGuestbookClient.tsx",
+  );
+
+  assert.ok(fs.existsSync(pagePath));
+  assert.ok(fs.existsSync(clientPath));
+  const client = fs.readFileSync(clientPath, "utf8");
+  for (const status of ["pending", "approved", "hidden"]) {
+    assert.match(client, new RegExp(status));
+  }
+  assert.match(client, /onRequest|PATCH|method:\s*["']PATCH["']/);
+  assert.match(client, /method:\s*["']DELETE["']/);
+});
+
+test("protects guestbook moderation with an in-site password login", () => {
+  const adminRoot = path.join(root, "app", "admin", "guestbook");
+  const loginPath = path.join(adminRoot, "AdminLogin.tsx");
+  const pagePath = path.join(adminRoot, "page.tsx");
+  const clientPath = path.join(adminRoot, "AdminGuestbookClient.tsx");
+  const helperPath = path.join(root, "scripts", "hash-admin-password.mjs");
+  const packagePath = path.join(root, "package.json");
+
+  assert.ok(fs.existsSync(loginPath));
+  assert.ok(fs.existsSync(helperPath));
+
+  const login = fs.readFileSync(loginPath, "utf8");
+  const page = fs.readFileSync(pagePath, "utf8");
+  const client = fs.readFileSync(clientPath, "utf8");
+  const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+
+  assert.match(login, /type="password"/);
+  assert.match(login, /NEXT_PUBLIC_TURNSTILE_SITE_KEY/);
+  assert.match(login, /\/api\/admin\/login/);
+  assert.doesNotMatch(page, /Cloudflare Access/);
+  assert.match(client, /\/api\/admin\/session/);
+  assert.match(client, /\/api\/admin\/logout/);
+  assert.match(packageJson.scripts["admin:hash"], /hash-admin-password/);
 });
