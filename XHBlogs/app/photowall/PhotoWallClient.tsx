@@ -158,25 +158,39 @@ export default function PhotoWallClient() {
                 </div>
               </div>
 
-              <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
-                {currentAlbum.photos.map((photo, index) => (
-                  <div
-                    key={`${photo.url}-${index}`}
-                    onClick={() => setSelectedImage(photo)}
-                    className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-zoom-in shadow-lg bg-white/20 dark:bg-slate-800/20 border border-white/30 dark:border-white/10 transition-transform duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/20 animate-fade-in-up"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <img src={photo.url} alt={photo.caption || '照片'} className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5">
-                      {photo.caption && (
-                        <p className="text-white font-medium text-sm drop-shadow-md translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                          {photo.caption}
-                        </p>
-                      )}
-                    </div>
+              {currentAlbum.photos.length === 0 ? (
+                <div className="glass-card flex min-h-64 flex-col items-center justify-center p-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-indigo-500/15 text-3xl text-indigo-300">
+                    ✦
                   </div>
-                ))}
-              </div>
+                  <h2 className="mt-5 text-2xl font-black text-white">
+                    这个相册还没有照片
+                  </h2>
+                  <p className="mt-2 max-w-md text-sm leading-7 text-slate-400">
+                    旅游剪影已经建好，之后上传的照片会出现在这里。
+                  </p>
+                </div>
+              ) : (
+                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+                  {currentAlbum.photos.map((photo, index) => (
+                    <div
+                      key={`${photo.url}-${index}`}
+                      onClick={() => setSelectedImage(photo)}
+                      className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-zoom-in shadow-lg bg-white/20 dark:bg-slate-800/20 border border-white/30 dark:border-white/10 transition-transform duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/20 animate-fade-in-up"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <img src={photo.url} alt={photo.caption || '照片'} className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-5">
+                        {photo.caption && (
+                          <p className="text-white font-medium text-sm drop-shadow-md translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                            {photo.caption}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

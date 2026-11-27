@@ -158,3 +158,18 @@ test("builds a GitHub Pages static export", () => {
   assert.match(workflow, /actions\/upload-pages-artifact/);
   assert.match(workflow, /actions\/deploy-pages/);
 });
+
+test("adds the travel silhouettes album with an empty state", () => {
+  const albums = fs.readFileSync(
+    path.join(root, "data", "albums.ts"),
+    "utf8",
+  );
+  const photoWall = fs.readFileSync(
+    path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
+    "utf8",
+  );
+
+  assert.match(albums, /title:\s*["']旅游剪影["']/);
+  assert.match(photoWall, /currentAlbum\.photos\.length\s*===\s*0/);
+  assert.match(photoWall, /这个相册还没有照片/);
+});

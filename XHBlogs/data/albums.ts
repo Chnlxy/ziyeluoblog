@@ -68,4 +68,12 @@ export const albums: Album[] = [
       },
     ],
   },
+  {
+    id: "travel-silhouettes",
+    title: "旅游剪影",
+    description: "旅途中的风景与片刻，照片会陆续放进来。",
+    cover: "/images/covers/default-cover.svg",
+    date: "2026.11",
+    photos: [],
+  },
 ];
