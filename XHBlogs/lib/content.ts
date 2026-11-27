@@ -64,3 +64,7 @@ export function getMoments(): MomentSummary[] {
         : dateDiff;
     });
 }
+
+export function getMoment(id: string): MomentSummary | null {
+  return getMoments().find((moment) => moment.id === id) ?? null;
+}

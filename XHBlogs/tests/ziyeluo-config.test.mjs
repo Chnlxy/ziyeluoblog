@@ -296,3 +296,38 @@ test("keeps desktop navigation and layout on fine-pointer devices", () => {
   assert.equal((home.match(/desktop-wide:grid-cols-12/g) ?? []).length, 3);
   assert.doesNotMatch(home, /\b(?:md|lg):/);
 });
+
+test("provides a safe single-moment lookup and shared image lightbox", () => {
+  const content = fs.readFileSync(
+    path.join(root, "lib", "content.ts"),
+    "utf8",
+  );
+  const lightboxPath = path.join(
+    root,
+    "components",
+    "MomentImageLightbox.tsx",
+  );
+
+  assert.match(content, /export function getMoment\(id: string\)/);
+  assert.match(
+    content,
+    /getMoments\(\)\.find\(\(moment\) => moment\.id === id\)/,
+  );
+  assert.ok(fs.existsSync(lightboxPath));
+});
+
+test("generates a static detail page for every moment", () => {
+  const routePath = path.join(root, "app", "moments", "[id]", "page.tsx");
+  const list = fs.readFileSync(
+    path.join(root, "app", "moments", "MomentList.tsx"),
+    "utf8",
+  );
+
+  assert.ok(fs.existsSync(routePath));
+  const route = fs.readFileSync(routePath, "utf8");
+  assert.match(route, /generateStaticParams/);
+  assert.match(route, /getMoment\(resolvedParams\.id\)/);
+  assert.match(list, /href=\{`\/moments\/\$\{moment\.id\}\/`\}/);
+  assert.match(list, /absolute inset-0 z-10/);
+  assert.match(list, /relative z-20/);
+});

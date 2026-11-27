@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import Link from "next/link";
+import { Search } from "lucide-react";
 
+import MomentImageLightbox from "../../components/MomentImageLightbox";
 import { formatContentDate } from "../../lib/format";
 import type { MomentSummary } from "../../lib/content-types";
 
@@ -38,17 +40,6 @@ export default function MomentList({
         return order === "new" ? -difference : difference;
       });
   }, [moments, order, query]);
-
-  const moveLightbox = (direction: number) => {
-    if (!lightbox) return;
-
-    setLightbox({
-      ...lightbox,
-      index:
-        (lightbox.index + direction + lightbox.images.length) %
-        lightbox.images.length,
-    });
-  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-24 sm:px-6 md:pt-28">
@@ -109,8 +100,14 @@ export default function MomentList({
           {visibleMoments.map((moment) => (
             <article
               key={moment.id}
-              className="glass-card mb-5 break-inside-avoid p-6 md:p-7"
+              className="glass-card group relative mb-5 break-inside-avoid p-6 transition hover:border-indigo-300/25 md:p-7"
             >
+              <Link
+                href={`/moments/${moment.id}/`}
+                aria-label={`查看 ${formatContentDate(moment.date)} 的说说`}
+                className="absolute inset-0 z-10 rounded-[inherit] focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
+
               <header className="flex items-center gap-3">
                 <img
                   src={avatarUrl}
@@ -144,7 +141,7 @@ export default function MomentList({
                       onClick={() =>
                         setLightbox({ images: moment.images, index })
                       }
-                      className="overflow-hidden rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                      className="relative z-20 overflow-hidden rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                     >
                       <img
                         src={image}
@@ -167,51 +164,12 @@ export default function MomentList({
       )}
 
       {lightbox && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="查看图片"
-          className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/95 p-4 backdrop-blur-xl"
-        >
-          <button
-            type="button"
-            aria-label="关闭图片"
-            onClick={() => setLightbox(null)}
-            className="absolute right-5 top-5 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
-          >
-            <X size={20} />
-          </button>
-
-          {lightbox.images.length > 1 && (
-            <>
-              <button
-                type="button"
-                aria-label="上一张"
-                onClick={() => moveLightbox(-1)}
-                className="absolute left-4 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                type="button"
-                aria-label="下一张"
-                onClick={() => moveLightbox(1)}
-                className="absolute right-4 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </>
-          )}
-
-          <img
-            src={lightbox.images[lightbox.index]}
-            alt=""
-            className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
-          />
-          <p className="absolute bottom-6 rounded-full bg-white/10 px-4 py-2 text-xs text-white">
-            {lightbox.index + 1} / {lightbox.images.length}
-          </p>
-        </div>
+        <MomentImageLightbox
+          images={lightbox.images}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onChange={(index) => setLightbox({ ...lightbox, index })}
+        />
       )}
     </div>
   );
