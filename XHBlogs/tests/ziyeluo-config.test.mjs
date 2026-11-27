@@ -340,3 +340,19 @@ test("reserves scrollbar space so the fixed background never shifts", () => {
 
   assert.match(styles, /html\s*\{[^}]*scrollbar-gutter:\s*stable;/s);
 });
+
+test("publishes Bilibili and GitHub on the homepage", () => {
+  const config = fs.readFileSync(path.join(root, "siteConfig.ts"), "utf8");
+  const profile = fs.readFileSync(
+    path.join(root, "components", "ProfileCard.tsx"),
+    "utf8",
+  );
+
+  assert.match(
+    config,
+    /bilibili:\s*"https:\/\/space\.bilibili\.com\/1283960511"/,
+  );
+  assert.match(config, /github:\s*"https:\/\/github\.com\/Chnlxy"/);
+  assert.match(profile, /type="bilibili"/);
+  assert.match(profile, /siteConfig\.social\?\.bilibili/);
+});

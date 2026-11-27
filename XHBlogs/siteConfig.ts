@@ -46,7 +46,8 @@ export const siteConfig = {
 
   cloudMusicIds: [],
   social: {
-    github: "",
+    github: "https://github.com/Chnlxy",
+    bilibili: "https://space.bilibili.com/1283960511",
     gitee: "",
     google: "",
     email: "",
