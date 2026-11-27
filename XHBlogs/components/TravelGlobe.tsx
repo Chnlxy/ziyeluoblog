@@ -733,8 +733,8 @@ export default function TravelGlobe({
   return (
     <div ref={containerRef} className="relative h-full w-full">
       <Canvas
-        className={`transition-opacity duration-700 ease-out motion-reduce:transition-none ${
-          texturesReady ? "opacity-100" : "opacity-0"
+        className={`globe-canvas ${
+          texturesReady ? "globe-canvas--ready" : "opacity-0"
         }`}
         aria-label="旅行足迹地球"
         camera={{ position: [0, 0.6, 3.2], fov: 42 }}

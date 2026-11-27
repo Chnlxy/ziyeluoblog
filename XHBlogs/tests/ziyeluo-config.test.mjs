@@ -719,15 +719,19 @@ test("fades the globe in after its textures load", () => {
     path.join(root, "components", "TravelGlobe.tsx"),
     "utf8",
   );
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
 
   assert.match(
     globe,
-    /texturesReady\s*\?\s*"opacity-100"\s*:\s*"opacity-0"/,
+    /texturesReady\s*\?\s*"globe-canvas--ready"\s*:\s*"opacity-0"/,
   );
-  assert.match(globe, /transition-opacity/);
-  assert.match(globe, /duration-700/);
+  assert.match(styles, /@keyframes globe-canvas-fade-in/);
+  assert.match(styles, /\.globe-canvas--ready/);
+  assert.match(styles, /animation:\s*globe-canvas-fade-in\s+700ms/);
   assert.match(globe, /aria-hidden=\{texturesReady\}/);
-  assert.match(globe, /motion-reduce:transition-none/);
 });
 
 test("keeps a fading route during destination switches", () => {

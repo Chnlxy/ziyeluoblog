@@ -60,12 +60,41 @@ Expected: FAIL；Canvas 当前没有透明度切换类，加载遮罩也是加�
 
 ```tsx
 <Canvas
-  className={`transition-opacity duration-700 ease-out motion-reduce:transition-none ${
-    texturesReady ? "opacity-100" : "opacity-0"
+  className={`globe-canvas ${
+    texturesReady ? "globe-canvas--ready" : "opacity-0"
   }`}
   aria-label="旅行足迹地球"
   // 其余 Canvas 属性保持不变
 >
+```
+
+`globals.css` 增加关键帧，确保即使纹理从缓存瞬间就绪，也会从透明状态开始：
+
+```css
+.globe-canvas {
+  opacity: 0;
+}
+
+.globe-canvas--ready {
+  animation: globe-canvas-fade-in 700ms ease-out both;
+}
+
+@keyframes globe-canvas-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-canvas--ready {
+    animation: none;
+    opacity: 1;
+  }
+}
 ```
 
 加载遮罩改为始终挂载：
