@@ -214,9 +214,9 @@ export default function PhotoWallClient() {
           />
 
           {selectedImage.caption && (
-            <div className="absolute bottom-10 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white text-sm font-medium tracking-wide shadow-2xl">
+            <p className="mt-5 max-w-2xl rounded-2xl border border-white/10 bg-white/10 px-6 py-3 text-center text-sm font-medium tracking-wide text-white shadow-2xl backdrop-blur-md">
               {selectedImage.caption}
-            </div>
+            </p>
           )}
         </div>
       )}

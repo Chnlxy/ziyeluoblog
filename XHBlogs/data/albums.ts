@@ -100,7 +100,7 @@ export const albums: Album[] = [
       { url: "/images/albums/travel-silhouettes/23.webp" },
       { url: "/images/albums/travel-silhouettes/24.webp" },
       { url: "/images/albums/travel-silhouettes/25.webp" },
-      { url: "/images/albums/travel-silhouettes/26.webp" },
+      { url: "/images/albums/travel-silhouettes/26.webp", caption: "涩谷sky" },
       { url: "/images/albums/travel-silhouettes/27.webp" },
     ],
   },

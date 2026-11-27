@@ -193,3 +193,23 @@ test("publishes all selected travel photos", () => {
     );
   }
 });
+
+test("adds the Shibuya Sky note to the matching travel photo", () => {
+  const albums = fs.readFileSync(
+    path.join(root, "data", "albums.ts"),
+    "utf8",
+  );
+  assert.match(
+    albums,
+    /url:\s*["']\/images\/albums\/travel-silhouettes\/26\.webp["'],\s*caption:\s*["']涩谷sky["']/,
+  );
+});
+
+test("shows photo notes below the lightbox image", () => {
+  const photoWall = fs.readFileSync(
+    path.join(root, "app", "photowall", "PhotoWallClient.tsx"),
+    "utf8",
+  );
+  assert.match(photoWall, /selectedImage\.caption[\s\S]{0,250}mt-5/);
+  assert.doesNotMatch(photoWall, /absolute bottom-10[^`]*selectedImage\.caption/);
+});
