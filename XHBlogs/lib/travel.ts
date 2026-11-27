@@ -1,6 +1,7 @@
 export interface TravelVisit {
   date: string;
   endDate?: string;
+  datePrecision?: "day" | "month";
   note?: string;
   photos: string[];
 }
@@ -18,6 +19,7 @@ export interface TravelFallbackPlace {
   name: string;
   country: string;
   latestVisitDate: string;
+  latestVisitPrecision: "day" | "month";
   photoCount: number;
 }
 
@@ -38,6 +40,28 @@ function validDate(value: string) {
     !Number.isNaN(parsed.getTime()) &&
     parsed.toISOString().slice(0, 10) === value
   );
+}
+
+export function formatTravelDate(
+  value: string,
+  precision: "day" | "month" = "day",
+) {
+  const [year, month, day] = value
+    .split("-")
+    .map((part) => Number.parseInt(part, 10));
+  if (!year || !month || !day) return value;
+  if (precision === "month") return `${year}年${month}月`;
+  return `${year}年${month}月${day}日`;
+}
+
+export function formatTravelVisitRange(
+  visit: Pick<TravelVisit, "date" | "endDate" | "datePrecision">,
+) {
+  const precision = visit.datePrecision || "day";
+  const start = formatTravelDate(visit.date, precision);
+  return visit.endDate
+    ? `${start} — ${formatTravelDate(visit.endDate, precision)}`
+    : start;
 }
 
 function validPhoto(value: unknown) {
@@ -91,6 +115,12 @@ function validatePlace(place: TravelPlace, index: number) {
     if (visit.note !== undefined && typeof visit.note !== "string") {
       throw new Error(`${prefix}的旅行备注格式无效`);
     }
+    if (
+      visit.datePrecision !== undefined &&
+      !["day", "month"].includes(visit.datePrecision)
+    ) {
+      throw new Error(`${prefix}的日期精度无效`);
+    }
     if (visit.endDate) {
       if (!validDate(visit.endDate)) {
         throw new Error(`${prefix}的结束日期无效`);
@@ -138,6 +168,7 @@ export function buildTravelFallbackPlaces(
       name: place.name,
       country: place.country,
       latestVisitDate: latestVisit.date,
+      latestVisitPrecision: latestVisit.datePrecision || "day",
       photoCount: place.visits.reduce(
         (total, visit) => total + visit.photos.length,
         0,

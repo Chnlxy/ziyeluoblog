@@ -6,10 +6,10 @@ import { CalendarDays, Images, MapPin, MousePointer2 } from "lucide-react";
 
 import TravelDetailPanel from "../../components/TravelDetailPanel";
 import { travelPlaces } from "../../data/travel";
-import { formatContentDate } from "../../lib/format";
 import {
   type TravelFallbackPlace,
   buildTravelFallbackPlaces,
+  formatTravelDate,
   validateTravelPlaces,
 } from "../../lib/travel";
 import { detectWebglSupport } from "../../lib/webgl";
@@ -74,7 +74,10 @@ function WebglFallback({
               </h3>
               <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                 <CalendarDays size={13} />
-                {formatContentDate(place.latestVisitDate)}
+                {formatTravelDate(
+                  place.latestVisitDate,
+                  place.latestVisitPrecision,
+                )}
               </p>
               <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400">
                 <Images size={13} />

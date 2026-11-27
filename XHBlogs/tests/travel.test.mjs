@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   buildTravelFallbackPlaces,
   cameraPositionForRoute,
+  formatTravelDate,
+  formatTravelVisitRange,
   hangzhouHome,
   isMarkerFrontFacing,
   latLngToVector3,
@@ -12,6 +14,7 @@ import {
   solarDirection,
   validateTravelPlaces,
 } from "../lib/travel.ts";
+import { travelPlaces } from "../data/travel.ts";
 
 const tokyo = {
   id: "tokyo",
@@ -145,6 +148,85 @@ test("rejects a non-string visit note", () => {
       ]),
     /备注/,
   );
+});
+
+test("rejects an unknown visit date precision", () => {
+  assert.throws(
+    () =>
+      validateTravelPlaces([
+        {
+          ...tokyo,
+          visits: [
+            {
+              date: "2026-07-13",
+              datePrecision: "year",
+              photos: [],
+            },
+          ],
+        },
+      ]),
+    /日期精度/,
+  );
+});
+
+test("formats month-only and exact-day visits without inventing days", () => {
+  assert.equal(
+    formatTravelDate("2016-09-01", "month"),
+    "2016年9月",
+  );
+  assert.equal(
+    formatTravelDate("2026-11-21", "day"),
+    "2026年11月21日",
+  );
+  assert.equal(
+    formatTravelVisitRange({
+      date: "2026-07-13",
+      endDate: "2026-07-23",
+      photos: [],
+    }),
+    "2026年7月13日 — 2026年7月23日",
+  );
+});
+
+test("includes the requested travel destinations and month precision", () => {
+  const requested = new Map(
+    travelPlaces
+      .filter((place) =>
+        ["bali", "brunei", "osaka", "shanghai"].includes(place.id),
+      )
+      .map((place) => [place.id, place]),
+  );
+
+  assert.deepEqual(
+    [...requested.keys()].sort(),
+    ["bali", "brunei", "osaka", "shanghai"],
+  );
+  assert.equal(requested.get("bali").coordinates[0], 115.1889);
+  assert.equal(requested.get("bali").coordinates[1], -8.4095);
+  assert.equal(requested.get("bali").visits[0].date, "2016-09-01");
+  assert.equal(
+    requested.get("bali").visits[0].datePrecision,
+    "month",
+  );
+  assert.equal(requested.get("brunei").visits[0].date, "2016-09-01");
+  assert.equal(requested.get("osaka").visits[0].date, "2026-07-01");
+  assert.equal(requested.get("osaka").visits[0].datePrecision, "month");
+  assert.equal(
+    requested.get("shanghai").visits[0].date,
+    "2026-11-21",
+  );
+  assert.equal(
+    requested.get("shanghai").visits[0].datePrecision,
+    "day",
+  );
+});
+
+test("keeps date precision in fallback location data", () => {
+  const bali = travelPlaces.find((place) => place.id === "bali");
+  const fallback = buildTravelFallbackPlaces([bali]);
+
+  assert.equal(fallback[0].latestVisitDate, "2016-09-01");
+  assert.equal(fallback[0].latestVisitPrecision, "month");
 });
 
 test("maps coordinates onto a unit sphere", () => {
@@ -295,6 +377,7 @@ test("builds safe fallback data and returns empty data for invalid visits", () =
       name: "东京",
       country: "日本",
       latestVisitDate: "2026-07-13",
+      latestVisitPrecision: "day",
       photoCount: 1,
     },
   ]);

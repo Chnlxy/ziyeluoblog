@@ -9,14 +9,11 @@ import {
 } from "react";
 import { CalendarDays, Images, MapPin, X } from "lucide-react";
 
-import { formatContentDate } from "../lib/format";
-import type { TravelPlace } from "../lib/travel";
+import {
+  formatTravelVisitRange,
+  type TravelPlace,
+} from "../lib/travel";
 import MomentImageLightbox from "./MomentImageLightbox";
-
-function formatVisitRange(date: string, endDate?: string) {
-  const start = formatContentDate(date);
-  return endDate ? `${start} — ${formatContentDate(endDate)}` : start;
-}
 
 export default function TravelDetailPanel({
   place,
@@ -131,7 +128,7 @@ export default function TravelDetailPanel({
               >
                 <p className="flex items-center gap-2 text-xs font-bold text-indigo-300">
                   <CalendarDays size={14} />
-                  {formatVisitRange(visit.date, visit.endDate)}
+                  {formatTravelVisitRange(visit)}
                 </p>
                 {visit.note && (
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-200">
