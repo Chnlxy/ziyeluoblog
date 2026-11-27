@@ -365,13 +365,24 @@ export function markerHorizonVisibility(
   const cameraLength = Math.hypot(...cameraPosition);
   const centerHorizon = dot(cameraPosition, tipPosition) - 1;
   const capProjection = capRadius * cameraLength;
-  const fullyVisible = centerHorizon - capProjection;
-  const fullyHidden = centerHorizon + capProjection;
 
-  if (fullyHidden <= 0) return 0;
-  if (fullyVisible >= 0) return 1;
+  return centerHorizon + capProjection > 0 ? 1 : 0;
+}
 
-  const remaining = fullyHidden / (fullyHidden - fullyVisible);
-  const amount = Math.min(1, remaining / 0.15);
-  return amount * amount * (3 - 2 * amount);
+const MARKER_HIDE_FADE_SECONDS = 0.08;
+
+export function advanceMarkerOpacity(
+  current: number,
+  capVisible: boolean,
+  deltaSeconds: number,
+) {
+  if (capVisible) return 1;
+  if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
+    return current;
+  }
+
+  const next = current * Math.exp(
+    -deltaSeconds / MARKER_HIDE_FADE_SECONDS,
+  );
+  return next < 0.01 ? 0 : next;
 }

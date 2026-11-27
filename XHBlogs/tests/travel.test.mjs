@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  advanceMarkerOpacity,
   buildTravelFallbackPlaces,
   cameraPositionForRoute,
   formatTravelDate,
@@ -308,7 +309,7 @@ test("shows markers only when they face the camera", () => {
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
 });
 
-test("keeps the marker bright until the cap is almost hidden", () => {
+test("keeps the marker fully visible while its cap is visible", () => {
   const markerBase = latLngToVector3([0, 0], 1.003);
   const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
   const visibilityAt = (x) =>
@@ -316,8 +317,7 @@ test("keeps the marker bright until the cap is almost hidden", () => {
 
   assert.equal(visibilityAt(1), 1);
   assert.equal(visibilityAt(0.9), 1);
-  const finalFade = visibilityAt(0.885);
-  assert.ok(finalFade > 0 && finalFade < 1);
+  assert.equal(visibilityAt(0.885), 1);
   assert.equal(visibilityAt(0.88), 0);
   assert.equal(visibilityAt(0.87), 0);
   assert.equal(visibilityAt(0), 0);
@@ -325,6 +325,19 @@ test("keeps the marker bright until the cap is almost hidden", () => {
     markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07, 0.018),
     0,
   );
+});
+
+test("fades the marker only after its cap is hidden", () => {
+  let opacity = advanceMarkerOpacity(0, true, 1 / 60);
+  assert.equal(opacity, 1);
+
+  opacity = advanceMarkerOpacity(opacity, false, 1 / 60);
+  assert.ok(opacity > 0 && opacity < 1);
+
+  for (let frame = 0; frame < 60; frame++) {
+    opacity = advanceMarkerOpacity(opacity, false, 1 / 60);
+  }
+  assert.ok(opacity < 0.01);
 });
 
 test("moves solar longitude across UTC time of day", () => {

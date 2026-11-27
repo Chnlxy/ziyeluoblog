@@ -17,6 +17,7 @@ import * as THREE from "three";
 
 import {
   type TravelPlace,
+  advanceMarkerOpacity,
   cameraPositionForRoute,
   hangzhouHome,
   latLngToVector3,
@@ -292,6 +293,7 @@ function Marker({
   const beamMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const capMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const labelMaterial = useRef<THREE.SpriteMaterial>(null);
+  const opacity = useRef(0);
   const [hovered, setHovered] = useState(false);
   const wasVisible = useRef(false);
   const position = useMemo(
@@ -315,18 +317,25 @@ function Marker({
     [normal],
   );
 
-  useFrame(({ camera }) => {
+  useFrame(({ camera }, delta) => {
     if (!group.current) return;
     const markerScale =
       Math.max(0.75, camera.position.length() / 3.2) *
       (selected || focused ? 1.22 : 1);
-    const visibility = markerHorizonVisibility(
-      [position.x, position.y, position.z],
-      [camera.position.x, camera.position.y, camera.position.z],
-      MARKER_BEAM_HEIGHT * markerScale,
-      MARKER_CAP_RADIUS * markerScale,
+    const capVisible =
+      markerHorizonVisibility(
+        [position.x, position.y, position.z],
+        [camera.position.x, camera.position.y, camera.position.z],
+        MARKER_BEAM_HEIGHT * markerScale,
+        MARKER_CAP_RADIUS * markerScale,
+      ) > 0;
+    opacity.current = advanceMarkerOpacity(
+      opacity.current,
+      capVisible,
+      delta,
     );
-    const visible = visibility > 0;
+    const visibility = opacity.current;
+    const visible = capVisible || visibility > 0;
     group.current.visible = visible;
     if (wasVisible.current !== visible) {
       wasVisible.current = visible;
