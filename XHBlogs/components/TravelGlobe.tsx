@@ -19,8 +19,8 @@ import {
   type TravelPlace,
   cameraPositionForRoute,
   hangzhouHome,
-  isMarkerFrontFacing,
   latLngToVector3,
+  markerHorizonVisibility,
   routeFadeOpacity,
   sampleGreatCircleArc,
   solarDirection,
@@ -30,6 +30,7 @@ const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-mobile.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-mobile.jpg";
+const MARKER_BEAM_HEIGHT = 0.13;
 
 const vertexShader = `
   varying vec2 vUv;
@@ -285,8 +286,12 @@ function Marker({
   onSelect,
 }: MarkerProps) {
   const group = useRef<THREE.Group>(null);
+  const baseMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const beamMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const capMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const labelMaterial = useRef<THREE.SpriteMaterial>(null);
   const [hovered, setHovered] = useState(false);
-  const frontFacingRef = useRef(false);
+  const wasVisible = useRef(false);
   const position = useMemo(
     () => new THREE.Vector3(...latLngToVector3(coordinates, radius)),
     [coordinates, radius],
@@ -295,17 +300,30 @@ function Marker({
     () => createMarkerLabelTexture(label),
     [label],
   );
+  const normal = useMemo(
+    () => position.clone().normalize(),
+    [position],
+  );
+  const orientation = useMemo(
+    () =>
+      new THREE.Quaternion().setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        normal,
+      ),
+    [normal],
+  );
 
   useFrame(({ camera }) => {
     if (!group.current) return;
-    const nextFrontFacing = isMarkerFrontFacing(
+    const visibility = markerHorizonVisibility(
       [position.x, position.y, position.z],
       [camera.position.x, camera.position.y, camera.position.z],
     );
-    group.current.visible = nextFrontFacing;
-    if (frontFacingRef.current !== nextFrontFacing) {
-      frontFacingRef.current = nextFrontFacing;
-      if (!nextFrontFacing) {
+    const visible = visibility > 0.002;
+    group.current.visible = visible;
+    if (wasVisible.current !== visible) {
+      wasVisible.current = visible;
+      if (!visible) {
         setHovered(false);
         if (document.body.style.cursor === "pointer") {
           document.body.style.cursor = "";
@@ -316,6 +334,20 @@ function Marker({
       Math.max(0.75, camera.position.length() / 3.2) *
       (selected || focused ? 1.22 : 1);
     group.current.scale.setScalar(markerScale);
+
+    const interactiveOpacity = hovered || focused || selected ? 1 : 0.8;
+    if (baseMaterial.current) {
+      baseMaterial.current.opacity = visibility * interactiveOpacity;
+    }
+    if (beamMaterial.current) {
+      beamMaterial.current.opacity = visibility * interactiveOpacity * 0.9;
+    }
+    if (capMaterial.current) {
+      capMaterial.current.opacity = visibility * interactiveOpacity;
+    }
+    if (labelMaterial.current) {
+      labelMaterial.current.opacity = visibility * interactiveOpacity;
+    }
   });
 
   useEffect(
@@ -328,7 +360,6 @@ function Marker({
     [labelTexture],
   );
 
-  const interactive = hovered || focused || selected;
   const color =
     selected || focused
       ? "#fff1ad"
@@ -337,7 +368,11 @@ function Marker({
         : "#b4c4a9";
 
   return (
-    <group ref={group} position={position}>
+    <group
+      ref={group}
+      position={position}
+      quaternion={orientation}
+    >
       <mesh
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
@@ -353,11 +388,70 @@ function Marker({
           document.body.style.cursor = "";
         }}
       >
+        <sphereGeometry args={[0.012, 14, 14]} />
+        <meshBasicMaterial
+          ref={baseMaterial}
+          color={color}
+          transparent
+          opacity={0.8}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh
+        position={[0, MARKER_BEAM_HEIGHT / 2, 0]}
+        onClick={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          if (selectable && onSelect) onSelect(id);
+        }}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = selectable ? "pointer" : "default";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "";
+        }}
+      >
+        <cylinderGeometry
+          args={[0.006, 0.011, MARKER_BEAM_HEIGHT, 10, 1, true]}
+        />
+        <meshBasicMaterial
+          ref={beamMaterial}
+          color={color}
+          transparent
+          opacity={0.72}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+      <mesh
+        position={[0, MARKER_BEAM_HEIGHT, 0]}
+        onClick={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          if (selectable && onSelect) onSelect(id);
+        }}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = selectable ? "pointer" : "default";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "";
+        }}
+      >
         <sphereGeometry args={[0.018, 16, 16]} />
-        <meshBasicMaterial color={color} />
+        <meshBasicMaterial
+          ref={capMaterial}
+          color={color}
+          transparent
+          opacity={0.8}
+          depthWrite={false}
+        />
       </mesh>
       <sprite
-        position={[0, 0.055, 0]}
+        position={[0, MARKER_BEAM_HEIGHT + 0.07, 0]}
         scale={[0.32, 0.08, 1]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
@@ -374,9 +468,10 @@ function Marker({
         }}
       >
         <spriteMaterial
+          ref={labelMaterial}
           map={labelTexture}
           transparent
-          opacity={interactive ? 1 : selected ? 0.92 : 0.72}
+          opacity={0.8}
           depthTest={false}
           depthWrite={false}
         />

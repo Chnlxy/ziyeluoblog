@@ -350,3 +350,14 @@ export function isMarkerFrontFacing(
     ]) > 0
   );
 }
+
+export function markerHorizonVisibility(
+  markerPosition: [number, number, number],
+  cameraPosition: [number, number, number],
+) {
+  const normal = normalize(markerPosition);
+  const radius = Math.hypot(...markerPosition);
+  const horizon = dot(normal, cameraPosition) - radius;
+  const amount = Math.max(0, Math.min(1, (horizon + 0.12) / 0.2));
+  return amount * amount * (3 - 2 * amount);
+}

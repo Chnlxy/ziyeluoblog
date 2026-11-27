@@ -624,6 +624,14 @@ test("ships a real 3D travel globe with local earth textures", () => {
   assert.match(globe, /aria-label="旅行足迹地球"/);
   assert.doesNotMatch(globe, /\bHtml\b/);
   assert.match(globe, /CanvasTexture/);
+  assert.match(globe, /markerHorizonVisibility/);
+  assert.match(globe, /cylinderGeometry/);
+  assert.match(globe, /MARKER_BEAM_HEIGHT/);
+  assert.match(globe, /labelMaterial/);
+  assert.doesNotMatch(
+    globe,
+    /group\.current\.visible\s*=\s*nextFrontFacing/,
+  );
   assert.match(globe, /aria-label="地点列表"/);
   assert.match(globe, /#include <tonemapping_fragment>/);
   assert.match(globe, /#include <colorspace_fragment>/);

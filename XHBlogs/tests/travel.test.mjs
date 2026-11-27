@@ -9,6 +9,7 @@ import {
   hangzhouHome,
   isMarkerFrontFacing,
   latLngToVector3,
+  markerHorizonVisibility,
   routeFadeOpacity,
   sampleGreatCircleArc,
   solarDirection,
@@ -305,6 +306,29 @@ test("shows markers only when they face the camera", () => {
 
   assert.equal(isMarkerFrontFacing(marker, [2.9, 0, 0]), true);
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
+});
+
+test("fades markers smoothly across the horizon", () => {
+  const marker = latLngToVector3([0, 0], 1.025);
+  const justBelow = markerHorizonVisibility(
+    marker,
+    [1.02, Math.sqrt(9 - 1.02 ** 2), 0],
+  );
+  const fartherBelow = markerHorizonVisibility(
+    marker,
+    [0.96, Math.sqrt(9 - 0.96 ** 2), 0],
+  );
+
+  assert.equal(
+    markerHorizonVisibility(marker, [3, 0, 0]),
+    1,
+  );
+  assert.equal(
+    markerHorizonVisibility(marker, [-3, 0, 0]),
+    0,
+  );
+  assert.ok(justBelow > 0 && justBelow < 1);
+  assert.ok(fartherBelow < justBelow);
 });
 
 test("moves solar longitude across UTC time of day", () => {
