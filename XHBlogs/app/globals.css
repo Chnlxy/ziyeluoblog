@@ -124,6 +124,78 @@
   backdrop-filter: blur(22px);
 }
 
+.maintenance-calendar-scroll {
+  direction: rtl;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.maintenance-calendar-scroll > * {
+  direction: ltr;
+}
+
+.maintenance-calendar-months {
+  display: grid;
+  min-width: max-content;
+  height: 1rem;
+  margin-left: 1.5rem;
+  gap: 3px;
+  color: rgba(203, 213, 225, 0.55);
+  font-size: 9px;
+  line-height: 1rem;
+}
+
+.maintenance-calendar-months > span {
+  grid-row: 1;
+  white-space: nowrap;
+}
+
+.maintenance-calendar-weekdays {
+  display: grid;
+  width: 1rem;
+  flex: 0 0 1rem;
+  grid-template-rows: repeat(7, 10px);
+  gap: 3px;
+  color: rgba(203, 213, 225, 0.48);
+  font-size: 9px;
+  line-height: 10px;
+  text-align: right;
+}
+
+.maintenance-calendar-grid {
+  display: grid;
+  min-width: max-content;
+  grid-auto-columns: 10px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 10px);
+  gap: 3px;
+}
+
+.maintenance-calendar-day {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.maintenance-calendar-day--level-1 {
+  background: rgba(180, 147, 79, 0.32);
+}
+
+.maintenance-calendar-day--level-2 {
+  background: rgba(216, 197, 116, 0.54);
+}
+
+.maintenance-calendar-day--level-3 {
+  background: rgba(234, 220, 157, 0.76);
+}
+
+.maintenance-calendar-day--level-4 {
+  background: #eadc9d;
+}
+
 .footprints-layout {
   display: grid;
   align-items: start;

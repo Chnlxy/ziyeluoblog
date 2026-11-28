@@ -6,10 +6,13 @@ import Link from "next/link";
 import "highlight.js/styles/atom-one-dark.css";
 
 import BackButton from "../../components/BackButton";
+import MaintenanceCalendar from "../../components/MaintenanceCalendar";
 import Navbar from "../../components/Navbar";
 import PageTransition from "../../components/PageTransition";
+import { siteMaintenance } from "../../data/maintenance";
 import { getMoments, getPosts } from "../../lib/content";
 import { formatContentDate } from "../../lib/format";
+import { createMaintenanceEntries } from "../../lib/maintenance";
 import { renderMarkdown } from "../../lib/renderMarkdown.mjs";
 import { siteConfig } from "../../siteConfig";
 
@@ -40,8 +43,17 @@ export default async function AboutPage() {
     .join("");
 
   const contentHtml = (await renderMarkdown(content)).toString();
-  const posts = getPosts().slice(0, 3);
-  const moments = getMoments().slice(0, 3);
+  const maintenanceEntries = createMaintenanceEntries({
+    posts: getPosts(),
+    moments: getMoments(),
+    siteUpdates: siteMaintenance,
+  });
+  const recentMaintenance = maintenanceEntries.slice(0, 4);
+  const kindLabels = {
+    site: "站点",
+    post: "文章",
+    moment: "说说",
+  } as const;
 
   return (
     <div className="min-h-screen">
@@ -83,44 +95,56 @@ export default async function AboutPage() {
             </div>
           </section>
 
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
             <section className="glass-card p-6">
-              <h2 className="text-lg font-black text-white">最近文章</h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-300">
+                Changelog
+              </p>
+              <h2 className="mt-2 text-lg font-black text-white">
+                最近维护
+              </h2>
               <div className="mt-4 space-y-3">
-                {posts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/posts/${post.slug}`}
-                    className="block rounded-2xl border border-white/10 p-4 transition hover:border-indigo-300/30 hover:bg-white/5"
-                  >
-                    <p className="text-[10px] text-indigo-300">
-                      {formatContentDate(post.date)}
-                    </p>
-                    <p className="mt-1 font-bold text-slate-200">{post.title}</p>
-                  </Link>
-                ))}
+                {recentMaintenance.map((entry) => {
+                  const content = (
+                    <>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="rounded-full border border-indigo-300/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-300">
+                          {kindLabels[entry.kind]}
+                        </span>
+                        <time
+                          dateTime={entry.date}
+                          className="text-[10px] text-slate-500"
+                        >
+                          {formatContentDate(entry.date)}
+                        </time>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-200">
+                        {entry.title}
+                      </p>
+                    </>
+                  );
+
+                  return entry.href ? (
+                    <Link
+                      key={`${entry.kind}-${entry.date}-${entry.title}`}
+                      href={entry.href}
+                      className="block rounded-2xl border border-white/10 p-4 transition hover:border-indigo-300/30 hover:bg-white/5"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div
+                      key={`${entry.kind}-${entry.date}-${entry.title}`}
+                      className="rounded-2xl border border-white/10 p-4"
+                    >
+                      {content}
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
-            <section className="glass-card p-6">
-              <h2 className="text-lg font-black text-white">最近说说</h2>
-              <div className="mt-4 space-y-3">
-                {moments.map((moment) => (
-                  <Link
-                    key={moment.id}
-                    href="/moments"
-                    className="block rounded-2xl border border-white/10 p-4 transition hover:border-indigo-300/30 hover:bg-white/5"
-                  >
-                    <p className="text-[10px] text-indigo-300">
-                      {formatContentDate(moment.date)}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">
-                      {moment.content}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            <MaintenanceCalendar entries={maintenanceEntries} />
           </div>
         </main>
       </PageTransition>
