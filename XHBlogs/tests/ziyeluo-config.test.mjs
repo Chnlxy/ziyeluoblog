@@ -842,8 +842,9 @@ test("resolves the texture tier before loading Earth images", () => {
   assert.match(globe, /useState<boolean \| null>\(null\)/);
   assert.match(
     globe,
-    /const globeLoading =\s*desktopTextures === null \|\| !texturesReady/,
+    /const globeLoading =\s*desktopTextures === null \|\|\s*!texturesReady \|\|\s*\(desktopTextures === true && !atmosphereReady\)/,
   );
+  assert.match(globe, /onAtmosphereReady/);
   assert.match(
     globe,
     /desktopTextures !== null && \(\s*<Canvas/,

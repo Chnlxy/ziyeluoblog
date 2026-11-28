@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
-import { gibsCloudMapUrl } from "../lib/earthClouds";
+import {
+  cloudCrossfadeProgress,
+  gibsCloudMapUrl,
+} from "../lib/earthClouds";
 import {
   atmosphereFragmentShader,
   atmosphereVertexShader,
 } from "../lib/earthAtmosphereShader";
+
+export const FALLBACK_CLOUD_MAP =
+  "/images/globe/clouds-fallback.jpg";
 
 function configureTexture(texture: THREE.Texture) {
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -16,28 +23,49 @@ function configureTexture(texture: THREE.Texture) {
   texture.anisotropy = 4;
 }
 
+function textureTexel(texture: THREE.Texture) {
+  const image = texture.image as
+    | { width?: number; height?: number }
+    | undefined;
+  return new THREE.Vector2(
+    1 / (image?.width ?? 2048),
+    1 / (image?.height ?? 1024),
+  );
+}
+
 export default function EarthAtmosphere({
   sun,
   earthDayTexture,
+  onReady,
 }: {
   sun: [number, number, number];
   earthDayTexture: THREE.Texture;
+  onReady: () => void;
 }) {
+  const fallbackCloudTexture = useLoader(
+    THREE.TextureLoader,
+    FALLBACK_CLOUD_MAP,
+  );
+  const activeFallbackCloudTexture = useMemo(() => {
+    configureTexture(fallbackCloudTexture);
+    return fallbackCloudTexture;
+  }, [fallbackCloudTexture]);
+  const blendStartedAt = useRef<number | null>(null);
   const resources = useMemo(() => {
-    const placeholderTexture = new THREE.DataTexture(
+    const placeholderLiveCloud = new THREE.DataTexture(
       new Uint8Array([0, 0, 0, 0]),
       1,
       1,
     );
-    placeholderTexture.needsUpdate = true;
-
+    placeholderLiveCloud.needsUpdate = true;
     const material = new THREE.ShaderMaterial({
       uniforms: {
-        uHasClouds: { value: 0 },
-        uCloudTexel: {
-          value: new THREE.Vector2(1 / 2048, 1 / 1024),
-        },
-        cloudMap: { value: placeholderTexture },
+        uHasClouds: { value: 1 },
+        uHasLiveClouds: { value: 0 },
+        uCloudBlend: { value: 0 },
+        uCloudTexel: { value: textureTexel(activeFallbackCloudTexture) },
+        cloudMap: { value: activeFallbackCloudTexture },
+        liveCloudMap: { value: placeholderLiveCloud },
         earthDayMap: { value: earthDayTexture },
         sunDirection: { value: new THREE.Vector3(...sun) },
       },
@@ -50,9 +78,22 @@ export default function EarthAtmosphere({
       blending: THREE.NormalBlending,
     });
 
-    return { material, placeholderTexture };
-  }, [earthDayTexture]);
-  const { material, placeholderTexture } = resources;
+    return { material, placeholderLiveCloud };
+  }, [activeFallbackCloudTexture, earthDayTexture]);
+  const { material, placeholderLiveCloud } = resources;
+
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+
+  useFrame(() => {
+    if (blendStartedAt.current === null) return;
+    const progress = cloudCrossfadeProgress(
+      (performance.now() - blendStartedAt.current) / 1000,
+    );
+    material.uniforms.uCloudBlend.value = progress;
+    if (progress >= 1) blendStartedAt.current = null;
+  });
 
   useEffect(() => {
     material.uniforms.sunDirection.value.set(...sun);
@@ -72,19 +113,14 @@ export default function EarthAtmosphere({
         }
         configureTexture(texture);
         cloudTexture = texture;
-        const image = texture.image as
-          | { width?: number; height?: number }
-          | undefined;
-        material.uniforms.uCloudTexel.value.set(
-          1 / (image?.width ?? 2048),
-          1 / (image?.height ?? 1024),
-        );
-        material.uniforms.cloudMap.value = texture;
-        material.uniforms.uHasClouds.value = 1;
+        material.uniforms.uCloudTexel.value.copy(textureTexel(texture));
+        material.uniforms.liveCloudMap.value = texture;
+        material.uniforms.uHasLiveClouds.value = 1;
+        blendStartedAt.current = performance.now();
       },
       undefined,
       () => {
-        // Keep the normal-based atmosphere visible if NASA is offline.
+        // Keep the bundled local cloud map if NASA is offline.
       },
     );
 
@@ -97,9 +133,9 @@ export default function EarthAtmosphere({
   useEffect(
     () => () => {
       material.dispose();
-      placeholderTexture.dispose();
+      placeholderLiveCloud.dispose();
     },
-    [material, placeholderTexture],
+    [material, placeholderLiveCloud],
   );
 
   return (

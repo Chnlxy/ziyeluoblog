@@ -826,6 +826,7 @@ function TravelScene({
   desktopTextures,
   onSelect,
   onTexturesReady,
+  onAtmosphereReady,
 }: {
   places: TravelPlace[];
   selectedId: string | null;
@@ -834,6 +835,7 @@ function TravelScene({
   desktopTextures: boolean;
   onSelect: (id: string | null) => void;
   onTexturesReady: () => void;
+  onAtmosphereReady: () => void;
 }) {
   const reducedMotion = useReducedMotion();
   const [celestial, setCelestial] =
@@ -937,10 +939,13 @@ function TravelScene({
         />
       </Suspense>
       {desktopTextures && activeEarthDayTexture && (
-        <EarthAtmosphere
-          sun={sun}
-          earthDayTexture={activeEarthDayTexture}
-        />
+        <Suspense fallback={null}>
+          <EarthAtmosphere
+            sun={sun}
+            earthDayTexture={activeEarthDayTexture}
+            onReady={onAtmosphereReady}
+          />
+        </Suspense>
       )}
       <Marker
         id="hangzhou"
@@ -1004,11 +1009,17 @@ export default function TravelGlobe({
   const [maxDpr, setMaxDpr] = useState(1.5);
   const [focusedPlaceId, setFocusedPlaceId] = useState<string | null>(null);
   const [texturesReady, setTexturesReady] = useState(false);
+  const [atmosphereReady, setAtmosphereReady] = useState(false);
   const handleTexturesReady = useCallback(() => {
     setTexturesReady(true);
   }, []);
+  const handleAtmosphereReady = useCallback(() => {
+    setAtmosphereReady(true);
+  }, []);
   const globeLoading =
-    desktopTextures === null || !texturesReady;
+    desktopTextures === null ||
+    !texturesReady ||
+    (desktopTextures === true && !atmosphereReady);
 
   useEffect(() => {
     const update = () => setMaxDpr(window.innerWidth < 768 ? 1.5 : 2);
@@ -1043,6 +1054,7 @@ export default function TravelGlobe({
             desktopTextures={desktopTextures}
             onSelect={onSelect}
             onTexturesReady={handleTexturesReady}
+            onAtmosphereReady={handleAtmosphereReady}
           />
         </Canvas>
       )}

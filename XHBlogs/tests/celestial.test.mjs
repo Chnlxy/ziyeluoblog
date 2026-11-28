@@ -7,12 +7,37 @@ import { fileURLToPath } from "node:url";
 import { brightStars } from "../data/brightStars.ts";
 import { buildCelestialSnapshot } from "../lib/celestial.ts";
 import {
+  cloudCrossfadeProgress,
   gibsCloudMapUrl,
   latestCloudObservationDate,
 } from "../lib/earthClouds.ts";
 import { solarDirection } from "../lib/travel.ts";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+
+function jpegDimensions(buffer) {
+  let offset = 2;
+  while (offset < buffer.length - 9) {
+    if (buffer[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    const marker = buffer[offset + 1];
+    if (
+      (marker >= 0xc0 && marker <= 0xc3) ||
+      (marker >= 0xc5 && marker <= 0xc7) ||
+      (marker >= 0xc9 && marker <= 0xcb) ||
+      (marker >= 0xcd && marker <= 0xcf)
+    ) {
+      return {
+        height: buffer.readUInt16BE(offset + 5),
+        width: buffer.readUInt16BE(offset + 7),
+      };
+    }
+    offset += 2 + buffer.readUInt16BE(offset + 2);
+  }
+  throw new Error("JPEG dimensions not found");
+}
 
 test("ships 50 valid stars sorted from bright to dim", () => {
   assert.equal(brightStars.length, 50);
@@ -141,11 +166,38 @@ test("adds a desktop-only atmospheric cloud layer", () => {
   assert.match(atmosphere, /depthWrite:\s*false/);
   assert.match(atmosphere, /sunDirection/);
   assert.match(atmosphere, /renderOrder=\{-1\}/);
+  assert.match(atmosphere, /clouds-fallback\.jpg/);
+  assert.match(atmosphere, /useLoader/);
+  assert.match(atmosphere, /uHasClouds:\s*\{\s*value:\s*1/);
+  assert.match(atmosphere, /onReady/);
+  assert.match(atmosphere, /uCloudBlend/);
+  assert.match(atmosphere, /uHasLiveClouds/);
+  assert.match(atmosphere, /useFrame/);
+  assert.match(atmosphere, /cloudCrossfadeProgress/);
   assert.match(
     globe,
     /desktopTextures &&\s*activeEarthDayTexture && \([\s\S]*<EarthAtmosphere[\s\S]*earthDayTexture=\{activeEarthDayTexture\}/,
   );
   assert.match(globe, /onDayTextureReady=\{handleDayTextureReady\}/);
+  assert.match(globe, /atmosphereReady/);
+  assert.match(globe, /onAtmosphereReady/);
+});
+
+test("ships a lightweight local cloud fallback", () => {
+  const cloudPath = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "clouds-fallback.jpg",
+  );
+  assert.ok(fs.existsSync(cloudPath));
+  const cloud = fs.readFileSync(cloudPath);
+  assert.ok(cloud.length < 250 * 1024);
+  assert.deepEqual(jpegDimensions(cloud), {
+    width: 1024,
+    height: 512,
+  });
 });
 
 test("gives satellite clouds a subtle volumetric relief", () => {
@@ -186,4 +238,24 @@ test("builds a global NASA GIBS cloud-map request", () => {
   assert.match(url, /WIDTH=2048/);
   assert.match(url, /HEIGHT=1024/);
   assert.match(url, /FORMAT=image%2Fjpeg/);
+});
+
+test("crossfades from the fallback cloud map to live imagery", () => {
+  const shader = fs.readFileSync(
+    path.join(root, "lib", "earthAtmosphereShader.ts"),
+    "utf8",
+  );
+
+  assert.match(shader, /uniform sampler2D liveCloudMap/);
+  assert.match(shader, /uniform float uHasLiveClouds/);
+  assert.match(shader, /uniform float uCloudBlend/);
+  assert.match(
+    shader,
+    /mix\(fallbackCloud, liveCloud, uCloudBlend \* uHasLiveClouds\)/,
+  );
+  assert.equal(cloudCrossfadeProgress(-1), 0);
+  assert.equal(cloudCrossfadeProgress(0), 0);
+  assert.equal(cloudCrossfadeProgress(0.25), 0.5);
+  assert.equal(cloudCrossfadeProgress(0.5), 1);
+  assert.equal(cloudCrossfadeProgress(2), 1);
 });

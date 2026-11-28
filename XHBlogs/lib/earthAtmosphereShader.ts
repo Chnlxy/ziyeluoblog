@@ -18,17 +18,18 @@ export const atmosphereVertexShader = `
 
 export const atmosphereFragmentShader = `
   uniform float uHasClouds;
+  uniform float uHasLiveClouds;
+  uniform float uCloudBlend;
   uniform vec2 uCloudTexel;
   uniform sampler2D cloudMap;
+  uniform sampler2D liveCloudMap;
   uniform sampler2D earthDayMap;
   uniform vec3 sunDirection;
   varying vec2 vUv;
   varying vec3 vWorldNormal;
   varying vec3 vViewDirection;
 
-  float cloudMask(vec2 uv) {
-    vec3 satelliteColor = texture2D(cloudMap, uv).rgb;
-    vec3 groundColor = texture2D(earthDayMap, uv).rgb;
+  float cloudMaskFrom(vec3 satelliteColor, vec3 groundColor) {
     float satelliteLuma = dot(
       satelliteColor,
       vec3(0.299, 0.587, 0.114)
@@ -41,6 +42,19 @@ export const atmosphereFragmentShader = `
       smoothstep(0.05, 0.22, satelliteLuma - groundLuma) *
       (1.0 - smoothstep(0.22, 0.55, spread)) *
       smoothstep(0.015, 0.08, satelliteLuma);
+  }
+
+  float cloudMask(vec2 uv) {
+    vec3 groundColor = texture2D(earthDayMap, uv).rgb;
+    float fallbackCloud = cloudMaskFrom(
+      texture2D(cloudMap, uv).rgb,
+      groundColor
+    );
+    float liveCloud = cloudMaskFrom(
+      texture2D(liveCloudMap, uv).rgb,
+      groundColor
+    );
+    return mix(fallbackCloud, liveCloud, uCloudBlend * uHasLiveClouds);
   }
 
   void main() {
