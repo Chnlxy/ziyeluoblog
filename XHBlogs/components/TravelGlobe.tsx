@@ -34,8 +34,8 @@ import CelestialSphere from "./CelestialSphere";
 
 const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
-const EARTH_DAY_MOBILE = "/images/globe/earth-day-mobile.jpg";
-const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-mobile.jpg";
+const EARTH_DAY_MOBILE = "/images/globe/earth-day-medium.jpg";
+const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-medium.jpg";
 const MARKER_BEAM_HEIGHT = 0.07;
 const MARKER_CAP_RADIUS = 0.018;
 const MARKER_SURFACE_RADIUS = 1.003;

@@ -627,24 +627,47 @@ test("ships a real 3D travel globe with local earth textures", () => {
     "globe",
     "earth-night-mobile.jpg",
   );
+  const mediumDayTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-day-medium.jpg",
+  );
+  const mediumNightTexture = path.join(
+    root,
+    "public",
+    "images",
+    "globe",
+    "earth-night-medium.jpg",
+  );
 
   assert.ok(fs.existsSync(globePath));
   assert.ok(fs.existsSync(dayTexture));
   assert.ok(fs.existsSync(nightTexture));
   assert.ok(fs.existsSync(mobileDayTexture));
   assert.ok(fs.existsSync(mobileNightTexture));
+  assert.ok(fs.existsSync(mediumDayTexture));
+  assert.ok(fs.existsSync(mediumNightTexture));
   assert.ok(fs.statSync(dayTexture).size < 3 * 1024 * 1024);
   assert.ok(fs.statSync(nightTexture).size < 3 * 1024 * 1024);
-  assert.ok(fs.statSync(mobileDayTexture).size < 900 * 1024);
-  assert.ok(fs.statSync(mobileNightTexture).size < 900 * 1024);
+  assert.ok(fs.statSync(mediumDayTexture).size > 400 * 1024);
+  assert.ok(fs.statSync(mediumDayTexture).size < 800 * 1024);
+  assert.ok(fs.statSync(mediumNightTexture).size > 180 * 1024);
+  assert.ok(fs.statSync(mediumNightTexture).size < 500 * 1024);
+  assert.ok(
+    fs.statSync(mediumDayTexture).size +
+      fs.statSync(mediumNightTexture).size <
+      1100 * 1024,
+  );
 
   const globe = fs.readFileSync(globePath, "utf8");
   assert.match(globe, /@react-three\/fiber/);
   assert.match(globe, /solarDirection/);
   assert.match(globe, /earth-day\.jpg/);
   assert.match(globe, /earth-night\.jpg/);
-  assert.match(globe, /earth-day-mobile\.jpg/);
-  assert.match(globe, /earth-night-mobile\.jpg/);
+  assert.match(globe, /earth-day-medium\.jpg/);
+  assert.match(globe, /earth-night-medium\.jpg/);
   assert.match(globe, /aria-label="旅行足迹地球"/);
   assert.doesNotMatch(globe, /\bHtml\b/);
   assert.match(globe, /CanvasTexture/);
