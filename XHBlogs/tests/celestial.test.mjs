@@ -148,6 +148,20 @@ test("adds a desktop-only atmospheric cloud layer", () => {
   assert.match(globe, /onDayTextureReady=\{handleDayTextureReady\}/);
 });
 
+test("gives satellite clouds a subtle volumetric relief", () => {
+  const atmosphere = fs.readFileSync(
+    path.join(root, "components", "EarthAtmosphere.tsx"),
+    "utf8",
+  );
+
+  assert.match(atmosphere, /float cloudMask\(vec2 uv\)/);
+  assert.match(atmosphere, /uniform vec2 uCloudTexel/);
+  assert.match(atmosphere, /vec2 tangentLight/);
+  assert.match(atmosphere, /float cloudRelief/);
+  assert.match(atmosphere, /vUv \+ tangentLight \* uCloudTexel/);
+  assert.match(atmosphere, /vUv - tangentLight \* uCloudTexel/);
+});
+
 test("selects the latest complete UTC observation day", () => {
   assert.equal(
     latestCloudObservationDate(new Date("2026-11-28T00:01:00Z")),
