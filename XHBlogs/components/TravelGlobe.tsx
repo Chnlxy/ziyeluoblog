@@ -88,11 +88,7 @@ function useReducedMotion() {
 }
 
 function useDesktopTextureSet() {
-  const [desktop, setDesktop] = useState(() =>
-    typeof window === "undefined"
-      ? false
-      : window.matchMedia("(min-width: 768px)").matches,
-  );
+  const [desktop, setDesktop] = useState<boolean | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
@@ -805,6 +801,8 @@ export default function TravelGlobe({
   const handleTexturesReady = useCallback(() => {
     setTexturesReady(true);
   }, []);
+  const globeLoading =
+    desktopTextures === null || !texturesReady;
 
   useEffect(() => {
     const update = () => setMaxDpr(window.innerWidth < 768 ? 1.5 : 2);
@@ -818,33 +816,35 @@ export default function TravelGlobe({
       ref={containerRef}
       className="relative h-full w-full overflow-hidden rounded-[2rem]"
     >
-      <Canvas
-        className={`globe-canvas ${
-          texturesReady ? "globe-canvas--ready" : "opacity-0"
-        }`}
-        aria-label="旅行足迹地球"
-        camera={{ position: [0, 0.6, 3.2], fov: 42 }}
-        dpr={[1, maxDpr]}
-        frameloop={pageVisible ? "always" : "never"}
-        gl={{ antialias: true, alpha: true }}
-        onPointerMissed={() => onSelect(null)}
-        style={{ touchAction: "none" }}
-      >
-        <TravelScene
-          places={places}
-          selectedId={selectedId}
-          focusedId={focusedPlaceId}
-          active={pageVisible}
-          desktopTextures={desktopTextures}
-          onSelect={onSelect}
-          onTexturesReady={handleTexturesReady}
-        />
-      </Canvas>
+      {desktopTextures !== null && (
+        <Canvas
+          className={`globe-canvas ${
+            texturesReady ? "globe-canvas--ready" : "opacity-0"
+          }`}
+          aria-label="旅行足迹地球"
+          camera={{ position: [0, 0.6, 3.2], fov: 42 }}
+          dpr={[1, maxDpr]}
+          frameloop={pageVisible ? "always" : "never"}
+          gl={{ antialias: true, alpha: true }}
+          onPointerMissed={() => onSelect(null)}
+          style={{ touchAction: "none" }}
+        >
+          <TravelScene
+            places={places}
+            selectedId={selectedId}
+            focusedId={focusedPlaceId}
+            active={pageVisible}
+            desktopTextures={desktopTextures}
+            onSelect={onSelect}
+            onTexturesReady={handleTexturesReady}
+          />
+        </Canvas>
+      )}
       <div
         aria-live="polite"
-        aria-hidden={texturesReady}
+        aria-hidden={!globeLoading}
         className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#1b1c18]/35 text-sm font-bold text-slate-200 backdrop-blur-sm transition-opacity duration-500 motion-reduce:transition-none ${
-          texturesReady ? "opacity-0" : "opacity-100"
+          globeLoading ? "opacity-100" : "opacity-0"
         }`}
       >
         正在加载地球纹理

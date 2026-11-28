@@ -778,7 +778,29 @@ test("fades the globe in after its textures load", () => {
   assert.match(styles, /@keyframes globe-canvas-fade-in/);
   assert.match(styles, /\.globe-canvas--ready/);
   assert.match(styles, /animation:\s*globe-canvas-fade-in\s+700ms/);
-  assert.match(globe, /aria-hidden=\{texturesReady\}/);
+  assert.match(globe, /aria-hidden=\{!globeLoading\}/);
+});
+
+test("resolves the texture tier before loading Earth images", () => {
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+
+  assert.match(globe, /useState<boolean \| null>\(null\)/);
+  assert.match(
+    globe,
+    /const globeLoading =\s*desktopTextures === null \|\| !texturesReady/,
+  );
+  assert.match(
+    globe,
+    /desktopTextures !== null && \(\s*<Canvas/,
+  );
+  assert.match(globe, /aria-hidden=\{!globeLoading\}/);
+  assert.match(
+    globe,
+    /globeLoading \? "opacity-100" : "opacity-0"/,
+  );
 });
 
 test("animates the globe loading dots like the splash screen", () => {
