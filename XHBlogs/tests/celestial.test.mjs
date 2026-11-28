@@ -7,6 +7,10 @@ import { fileURLToPath } from "node:url";
 import { brightStars } from "../data/brightStars.ts";
 import { buildCelestialSnapshot } from "../lib/celestial.ts";
 import {
+  cloudReliefAmount,
+  tangentLightDirection,
+} from "../lib/cloudRelief.ts";
+import {
   gibsCloudMapUrl,
   latestCloudObservationDate,
 } from "../lib/earthClouds.ts";
@@ -160,6 +164,29 @@ test("gives satellite clouds a subtle volumetric relief", () => {
   assert.match(atmosphere, /float cloudRelief/);
   assert.match(atmosphere, /vUv \+ tangentLight \* uCloudTexel/);
   assert.match(atmosphere, /vUv - tangentLight \* uCloudTexel/);
+});
+
+test("points cloud relief toward the local sun direction", () => {
+  const east = tangentLightDirection([0, 0, 1], [1, 0, 0]);
+  const north = tangentLightDirection([0, 0, 1], [0, 1, 0]);
+
+  assert.ok(east[0] > 0.9999);
+  assert.ok(Math.abs(east[1]) < 0.0002);
+  assert.ok(Math.abs(north[0]) < 0.0002);
+  assert.ok(north[1] > 0.9999);
+});
+
+test("keeps cloud relief normalized at the sphere poles", () => {
+  const direction = tangentLightDirection([0, 1, 0], [1, 0, 0]);
+
+  assert.ok(Math.abs(Math.hypot(...direction) - 1) < 1e-6);
+  assert.ok(direction[0] > 0.999);
+});
+
+test("darkens slopes that rise toward the sun and lifts opposite slopes", () => {
+  assert.ok(Math.abs(cloudReliefAmount(0.7, 0.8, 0.4) + 0.4) < 1e-12);
+  assert.ok(Math.abs(cloudReliefAmount(0.7, 0.4, 0.8) - 0.4) < 1e-12);
+  assert.ok(Math.abs(cloudReliefAmount(0.1, 0.8, 0.4)) < 1e-12);
 });
 
 test("selects the latest complete UTC observation day", () => {

@@ -3,6 +3,11 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
+import {
+  CLOUD_RELIEF_END,
+  CLOUD_RELIEF_START,
+  CLOUD_TANGENT_EPSILON,
+} from "../lib/cloudRelief";
 import { gibsCloudMapUrl } from "../lib/earthClouds";
 
 const atmosphereVertexShader = `
@@ -50,12 +55,13 @@ const atmosphereFragmentShader = `
     vec3 normal = normalize(vWorldNormal);
     vec3 sunNormal = normalize(sunDirection);
     vec3 east = normalize(
-      vec3(normal.z, 0.0, -normal.x) + vec3(0.0001, 0.0, 0.0)
+      vec3(normal.z, 0.0, -normal.x) +
+      vec3(${CLOUD_TANGENT_EPSILON}, 0.0, 0.0)
     );
     vec3 north = normalize(cross(normal, east));
     vec2 tangentLight = normalize(
       vec2(dot(sunNormal, east), dot(sunNormal, north)) +
-      vec2(0.0001)
+      vec2(${CLOUD_TANGENT_EPSILON})
     );
 
     float cloud = cloudMask(vUv) * uHasClouds;
@@ -65,7 +71,7 @@ const atmosphereFragmentShader = `
       cloudMask(vUv - tangentLight * uCloudTexel) * uHasClouds;
     float cloudRelief =
       (awayFromLight - towardLight) *
-      smoothstep(0.1, 0.7, cloud);
+      smoothstep(${CLOUD_RELIEF_START}, ${CLOUD_RELIEF_END}, cloud);
 
     float sunlight = smoothstep(
       -0.08,
