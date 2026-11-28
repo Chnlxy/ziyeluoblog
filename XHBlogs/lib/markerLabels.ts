@@ -12,6 +12,16 @@ export interface MarkerLabelCandidate {
   rect: MarkerLabelRect;
 }
 
+export const HOME_LABEL_PRIORITY = 100;
+export const SELECTED_LABEL_PRIORITY = Number.MAX_SAFE_INTEGER;
+
+export function isLabelInteractive(
+  layoutVisible: boolean,
+  opacity: number,
+) {
+  return layoutVisible && opacity > 0.01;
+}
+
 function overlaps(
   left: MarkerLabelRect,
   right: MarkerLabelRect,

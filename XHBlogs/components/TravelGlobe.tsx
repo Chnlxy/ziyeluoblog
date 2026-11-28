@@ -30,7 +30,17 @@ import {
   routeFadeOpacity,
   sampleGreatCircleArc,
   solarDirection,
+  travelPlaceLabelPriority,
 } from "../lib/travel";
+import {
+  type MarkerLabelCandidate,
+  type MarkerLabelRect,
+  HOME_LABEL_PRIORITY,
+  SELECTED_LABEL_PRIORITY,
+  advanceLabelLayoutOpacity,
+  isLabelInteractive,
+  resolveMarkerLabelVisibility,
+} from "../lib/markerLabels";
 import CelestialSphere from "./CelestialSphere";
 import EarthAtmosphere from "./EarthAtmosphere";
 
@@ -308,6 +318,8 @@ interface MarkerProps {
   label: string;
   coordinates: [number, number];
   radius: number;
+  labelPriority: number;
+  labelLayoutRef: RefObject<Map<string, MarkerLabelLayoutEntry>>;
   selected: boolean;
   focused: boolean;
   selectable: boolean;
@@ -315,11 +327,75 @@ interface MarkerProps {
   onSelect?: (id: string) => void;
 }
 
+interface MarkerLabelLayoutEntry {
+  candidate: MarkerLabelCandidate;
+  target: RefObject<boolean>;
+}
+
+function projectToScreen(
+  point: THREE.Vector3,
+  camera: THREE.Camera,
+  width: number,
+  height: number,
+) {
+  const projected = point.clone().project(camera);
+  if (!Number.isFinite(projected.x) || !Number.isFinite(projected.y)) {
+    return null;
+  }
+  return {
+    x: (projected.x * 0.5 + 0.5) * width,
+    y: (-projected.y * 0.5 + 0.5) * height,
+  };
+}
+
+function labelScreenRect(
+  group: THREE.Group,
+  camera: THREE.Camera,
+  width: number,
+  height: number,
+  scale: number,
+  labelY: number,
+): MarkerLabelRect | null {
+  group.updateWorldMatrix(true, false);
+  camera.updateMatrixWorld();
+  const center = new THREE.Vector3(0, labelY, 0).applyMatrix4(
+    group.matrixWorld,
+  );
+  const right = new THREE.Vector3().setFromMatrixColumn(
+    camera.matrixWorld,
+    0,
+  );
+  const up = new THREE.Vector3().setFromMatrixColumn(
+    camera.matrixWorld,
+    1,
+  );
+  const halfWidth = (MARKER_LABEL_WIDTH * scale) / 2;
+  const halfHeight = (MARKER_LABEL_HEIGHT * scale) / 2;
+  const points = [
+    center.clone().addScaledVector(right, -halfWidth),
+    center.clone().addScaledVector(right, halfWidth),
+    center.clone().addScaledVector(up, -halfHeight),
+    center.clone().addScaledVector(up, halfHeight),
+  ].map((point) => projectToScreen(point, camera, width, height));
+
+  if (points.some((point) => point === null)) return null;
+  const xs = points.map((point) => point!.x);
+  const ys = points.map((point) => point!.y);
+  return {
+    left: Math.min(...xs),
+    right: Math.max(...xs),
+    top: Math.min(...ys),
+    bottom: Math.max(...ys),
+  };
+}
+
 function Marker({
   id,
   label,
   coordinates,
   radius,
+  labelPriority,
+  labelLayoutRef,
   selected,
   focused,
   selectable,
@@ -331,6 +407,8 @@ function Marker({
   const beamMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const capMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const labelMaterial = useRef<THREE.SpriteMaterial>(null);
+  const layoutVisible = useRef(true);
+  const layoutOpacity = useRef(1);
   const opacity = useRef(0);
   const [hovered, setHovered] = useState(false);
   const wasVisible = useRef(false);
@@ -354,8 +432,12 @@ function Marker({
       ),
     [normal],
   );
+  const labelY =
+    MARKER_BEAM_HEIGHT +
+    MARKER_LABEL_HEIGHT +
+    labelTier * MARKER_LABEL_STAGGER;
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, gl }, delta) => {
     if (!group.current) return;
     const markerScale =
       Math.max(0.75, camera.position.length() / 3.2) *
@@ -385,6 +467,39 @@ function Marker({
       }
     }
     group.current.scale.setScalar(markerScale);
+    const width = gl.domElement.clientWidth;
+    const height = gl.domElement.clientHeight;
+    const rect =
+      width > 0 && height > 0
+        ? labelScreenRect(
+            group.current,
+            camera,
+            width,
+            height,
+            markerScale,
+            labelY,
+          )
+        : null;
+    if (rect) {
+      labelLayoutRef.current.set(id, {
+        candidate: {
+          id,
+          priority: selected
+            ? SELECTED_LABEL_PRIORITY
+            : labelPriority,
+          eligible: capVisible,
+          rect,
+        },
+        target: layoutVisible,
+      });
+    } else {
+      labelLayoutRef.current.delete(id);
+    }
+    layoutOpacity.current = advanceLabelLayoutOpacity(
+      layoutOpacity.current,
+      layoutVisible.current,
+      delta,
+    );
 
     const interactiveOpacity = hovered || focused || selected ? 1 : 0.8;
     if (baseMaterial.current) {
@@ -397,18 +512,20 @@ function Marker({
       capMaterial.current.opacity = visibility * interactiveOpacity;
     }
     if (labelMaterial.current) {
-      labelMaterial.current.opacity = visibility * interactiveOpacity;
+      labelMaterial.current.opacity =
+        visibility * interactiveOpacity * layoutOpacity.current;
     }
   });
 
   useEffect(
     () => () => {
+      labelLayoutRef.current.delete(id);
       labelTexture.dispose();
       if (document.body.style.cursor === "pointer") {
         document.body.style.cursor = "";
       }
     },
-    [labelTexture],
+    [id, labelLayoutRef, labelTexture],
   );
 
   const color =
@@ -547,19 +664,29 @@ function Marker({
         />
       </mesh>
       <sprite
-        position={[
-          0,
-          MARKER_BEAM_HEIGHT +
-            MARKER_LABEL_HEIGHT +
-            labelTier * MARKER_LABEL_STAGGER,
-          0,
-        ]}
+        position={[0, labelY, 0]}
         scale={[MARKER_LABEL_WIDTH, MARKER_LABEL_HEIGHT, 1]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
+          if (
+            !isLabelInteractive(
+              layoutVisible.current,
+              layoutOpacity.current,
+            )
+          ) {
+            return;
+          }
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
         }}
         onPointerOver={(event) => {
+          if (
+            !isLabelInteractive(
+              layoutVisible.current,
+              layoutOpacity.current,
+            )
+          ) {
+            return;
+          }
           event.stopPropagation();
           setHovered(true);
           document.body.style.cursor = selectable ? "pointer" : "default";
@@ -580,6 +707,25 @@ function Marker({
       </sprite>
     </group>
   );
+}
+
+function MarkerLabelResolver({
+  labelLayoutRef,
+}: {
+  labelLayoutRef: RefObject<Map<string, MarkerLabelLayoutEntry>>;
+}) {
+  useFrame(() => {
+    const entries = [...labelLayoutRef.current.values()];
+    const visibility = resolveMarkerLabelVisibility(
+      entries.map((entry) => entry.candidate),
+    );
+
+    for (const entry of entries) {
+      entry.target.current = visibility[entry.candidate.id] ?? false;
+    }
+  });
+
+  return null;
 }
 
 function TravelRoute({
@@ -737,6 +883,9 @@ function TravelScene({
       ]),
     [places],
   );
+  const labelLayoutRef = useRef<
+    Map<string, MarkerLabelLayoutEntry>
+  >(new Map());
   const [focusCancelled, setFocusCancelled] = useState(false);
   const [earthDayTexture, setEarthDayTexture] = useState<{
     texture: THREE.Texture;
@@ -815,6 +964,8 @@ function TravelScene({
         label="杭州 · 起点"
         coordinates={[...hangzhouHome.coordinates]}
         radius={MARKER_SURFACE_RADIUS}
+        labelPriority={HOME_LABEL_PRIORITY}
+        labelLayoutRef={labelLayoutRef}
         selected={false}
         focused={false}
         selectable={false}
@@ -827,6 +978,8 @@ function TravelScene({
           label={`${place.name} · ${place.country}`}
           coordinates={place.coordinates}
           radius={MARKER_SURFACE_RADIUS}
+          labelPriority={travelPlaceLabelPriority(place)}
+          labelLayoutRef={labelLayoutRef}
           selected={place.id === selectedId}
           focused={place.id === focusedId}
           selectable
@@ -834,6 +987,7 @@ function TravelScene({
           onSelect={onSelect}
         />
       ))}
+      <MarkerLabelResolver labelLayoutRef={labelLayoutRef} />
       {selected && (
         <TravelRoute
           key={selected.id}

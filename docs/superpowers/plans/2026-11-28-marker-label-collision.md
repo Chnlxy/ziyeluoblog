@@ -40,7 +40,7 @@
 - Produces: `DEFAULT_LABEL_PRIORITY = 40`
 - Produces: `travelPlaceLabelPriority(place: Pick<TravelPlace, "labelPriority">): number`
 
-- [ ] **Step 1: Write the failing data tests**
+- [x] **Step 1: Write the failing data tests**
 
 Add tests that assert:
 
@@ -65,7 +65,7 @@ assert.equal(
 );
 ```
 
-- [ ] **Step 2: Run the focused tests and verify they fail**
+- [x] **Step 2: Run the focused tests and verify they fail**
 
 Run from `XHBlogs`:
 
@@ -75,7 +75,7 @@ node --test tests/travel.test.mjs
 
 Expected: FAIL because `labelPriority` and `travelPlaceLabelPriority` do not exist.
 
-- [ ] **Step 3: Implement the priority contract**
+- [x] **Step 3: Implement the priority contract**
 
 Add:
 
@@ -99,7 +99,7 @@ In `validatePlace`, reject non-finite or non-positive priorities with an error c
 
 Assign the confirmed values in `data/travel.ts`.
 
-- [ ] **Step 4: Run the focused tests and verify they pass**
+- [x] **Step 4: Run the focused tests and verify they pass**
 
 Run from `XHBlogs`:
 
@@ -109,7 +109,7 @@ node --test tests/travel.test.mjs
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add XHBlogs/lib/travel.ts XHBlogs/data/travel.ts XHBlogs/tests/travel.test.mjs
@@ -128,7 +128,7 @@ git commit -m "feat: prioritize travel labels"
 - Produces: `resolveMarkerLabelVisibility(candidates, margin = 4): Record<string, boolean>`
 - Produces: `advanceLabelLayoutOpacity(current, targetVisible, deltaSeconds): number`
 
-- [ ] **Step 1: Write failing collision tests**
+- [x] **Step 1: Write failing collision tests**
 
 Create tests covering:
 
@@ -155,7 +155,7 @@ Also assert:
 - A non-overlapping layout keeps every eligible label visible.
 - `advanceLabelLayoutOpacity` waits around 180ms to hide and restores immediately.
 
-- [ ] **Step 2: Run the focused tests and verify they fail**
+- [x] **Step 2: Run the focused tests and verify they fail**
 
 Run from `XHBlogs`:
 
@@ -165,7 +165,7 @@ node --test tests/marker-labels.test.mjs
 
 Expected: FAIL because the module does not exist.
 
-- [ ] **Step 3: Implement the pure module**
+- [x] **Step 3: Implement the pure module**
 
 Implement AABB intersection with the `4px` margin. Sort eligible labels by descending priority and then original array index. Keep a label only when it does not overlap an already kept label. Return `false` for every ineligible candidate.
 
@@ -184,7 +184,7 @@ export function advanceLabelLayoutOpacity(
 }
 ```
 
-- [ ] **Step 4: Run the focused tests and verify they pass**
+- [x] **Step 4: Run the focused tests and verify they pass**
 
 Run from `XHBlogs`:
 
@@ -194,7 +194,7 @@ node --test tests/marker-labels.test.mjs
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add XHBlogs/lib/markerLabels.ts XHBlogs/tests/marker-labels.test.mjs
@@ -211,7 +211,7 @@ git commit -m "feat: resolve marker label collisions"
 - Consumes: `resolveMarkerLabelVisibility`, `advanceLabelLayoutOpacity`, and `travelPlaceLabelPriority`.
 - Produces: marker labels whose opacity depends on `horizon visibility * layout visibility * interaction opacity`.
 
-- [ ] **Step 1: Write the failing integration contract test**
+- [x] **Step 1: Write the failing integration contract test**
 
 Assert that `TravelGlobe.tsx` contains:
 
@@ -220,10 +220,13 @@ assert.match(globe, /resolveMarkerLabelVisibility/);
 assert.match(globe, /advanceLabelLayoutOpacity/);
 assert.match(globe, /labelLayoutRef/);
 assert.match(globe, /travelPlaceLabelPriority/);
-assert.match(globe, /priority=\{SELECTED_LABEL_PRIORITY\}/);
+assert.match(
+  globe,
+  /selected\s*\?\s*SELECTED_LABEL_PRIORITY\s*:\s*labelPriority/,
+);
 ```
 
-- [ ] **Step 2: Run the focused test and verify it fails**
+- [x] **Step 2: Run the focused test and verify it fails**
 
 Run from `XHBlogs`:
 
@@ -233,7 +236,7 @@ node --test tests/ziyeluo-config.test.mjs
 
 Expected: FAIL because collision projection is not connected.
 
-- [ ] **Step 3: Add screen-space projection**
+- [x] **Step 3: Add screen-space projection**
 
 Create one shared `labelLayoutRef` in `TravelScene`. Each `Marker` receives it plus its `labelPriority`.
 
@@ -250,11 +253,13 @@ Skip collision participation when the cap is not horizon-visible or when project
 
 Use `Number.MAX_SAFE_INTEGER` for the selected marker's priority.
 
-- [ ] **Step 4: Remove stale registrations**
+When a label is hidden by collision, its pointer handlers must return before calling `stopPropagation`, so the hidden Sprite cannot intercept clicks intended for a visible label.
+
+- [x] **Step 4: Remove stale registrations**
 
 Delete each marker id from `labelLayoutRef.current` on unmount so an old label rectangle cannot hide a current marker.
 
-- [ ] **Step 5: Run the focused tests and verify they pass**
+- [x] **Step 5: Run the focused tests and verify they pass**
 
 Run from `XHBlogs`:
 
@@ -265,7 +270,7 @@ node --test tests/marker-labels.test.mjs
 
 Expected: PASS.
 
-- [ ] **Step 6: Add real browser interaction verification**
+- [x] **Step 6: Add real browser interaction verification**
 
 Start the dev server and use Chromium with WebGL. Rotate to East Asia and verify:
 
@@ -276,7 +281,7 @@ Start the dev server and use Chromium with WebGL. Rotate to East Asia and verify
 - Beams remain visible while labels are hidden.
 - Repeat a basic touch-sized viewport check.
 
-- [ ] **Step 7: Run full verification**
+- [x] **Step 7: Run full verification**
 
 Run from `XHBlogs`:
 
@@ -288,6 +293,6 @@ $env:CI='true'; pnpm build
 
 Expected: all commands exit successfully.
 
-- [ ] **Step 8: Review, commit, and deploy**
+- [x] **Step 8: Review, commit, and deploy**
 
 Request an independent read-only code review. Address Critical and Important findings, commit, merge to `main`, push to the deployment remote, and verify the production site.

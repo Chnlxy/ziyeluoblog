@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   advanceLabelLayoutOpacity,
+  isLabelInteractive,
   resolveMarkerLabelVisibility,
 } from "../lib/markerLabels.ts";
 
@@ -118,4 +119,10 @@ test("fades hidden labels gradually and restores them immediately", () => {
 
   assert.ok(opacity > 0 && opacity < 0.1);
   assert.equal(advanceLabelLayoutOpacity(opacity, true, 1 / 60), 1);
+});
+
+test("does not let hidden labels intercept pointer events", () => {
+  assert.equal(isLabelInteractive(true, 1), true);
+  assert.equal(isLabelInteractive(false, 1), false);
+  assert.equal(isLabelInteractive(true, 0.009), false);
 });

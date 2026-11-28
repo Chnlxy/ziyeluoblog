@@ -716,6 +716,22 @@ test("ships a real 3D travel globe with local earth textures", () => {
   );
   assert.equal((globe.match(/toneMapped=\{false\}/g) ?? []).length, 3);
   assert.equal((globe.match(/colorWrite=\{false\}/g) ?? []).length, 1);
+  assert.match(globe, /resolveMarkerLabelVisibility/);
+  assert.match(globe, /advanceLabelLayoutOpacity/);
+  assert.match(globe, /labelLayoutRef/);
+  assert.match(globe, /travelPlaceLabelPriority/);
+  assert.match(
+    globe,
+    /selected\s*\?\s*SELECTED_LABEL_PRIORITY\s*:\s*labelPriority/,
+  );
+  assert.equal(
+    (
+      globe.match(
+        /isLabelInteractive\(\s*layoutVisible\.current,\s*layoutOpacity\.current,/g,
+      ) ?? []
+    ).length,
+    2,
+  );
   assert.match(globe, /const MARKER_SURFACE_RADIUS = 1\.003;/);
   assert.equal(
     (globe.match(/radius=\{MARKER_SURFACE_RADIUS\}/g) ?? []).length,
