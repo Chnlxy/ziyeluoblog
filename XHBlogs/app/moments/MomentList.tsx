@@ -10,12 +10,8 @@ import type { MomentSummary } from "../../lib/content-types";
 
 export default function MomentList({
   moments,
-  authorName,
-  avatarUrl,
 }: {
   moments: MomentSummary[];
-  authorName: string;
-  avatarUrl: string;
 }) {
   const [query, setQuery] = useState("");
   const [order, setOrder] = useState<"new" | "old">("new");
@@ -110,12 +106,12 @@ export default function MomentList({
 
               <header className="flex items-center gap-3">
                 <img
-                  src={avatarUrl}
+                  src={moment.author.avatarUrl}
                   alt=""
                   className="h-11 w-11 rounded-2xl object-cover"
                 />
                 <div>
-                  <h2 className="font-black text-white">{authorName}</h2>
+                  <h2 className="font-black text-white">{moment.author.name}</h2>
                   <p className="mt-0.5 text-[10px] font-bold text-indigo-300">
                     {formatContentDate(moment.date)}
                   </p>

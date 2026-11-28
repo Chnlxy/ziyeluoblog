@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-import { siteConfig } from "../siteConfig";
+import { siteConfig } from "../siteConfig.ts";
+import { resolveContentAuthor } from "../data/authors.ts";
 import type { MomentSummary, PostSummary } from "./content-types";
 
 function markdownFiles(directory: string) {
@@ -28,6 +29,7 @@ export function getPosts(): PostSummary[] {
         date: data.date || "",
         tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
         cover: data.cover || siteConfig.defaultPostCover,
+        author: resolveContentAuthor(data.author),
       };
     })
     .sort((a, b) => {
@@ -54,6 +56,7 @@ export function getMoments(): MomentSummary[] {
         location: data.location || "",
         images: Array.isArray(data.images) ? data.images.map(String) : [],
         content: content.trim(),
+        author: resolveContentAuthor(data.author),
       };
     })
     .sort((a, b) => {

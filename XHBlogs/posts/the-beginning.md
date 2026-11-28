@@ -2,6 +2,7 @@
 title: "故事的开始"
 description: "记录建站的初衷、维护方式，以及这个博客未来想成为的样子。"
 date: "2026-11-28"
+author: "ziyeluo"
 tags: ["站点", "随笔", "幻想郷"]
 cover: "/images/covers/the-beginning.webp"
 ---

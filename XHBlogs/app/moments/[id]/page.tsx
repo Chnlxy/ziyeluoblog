@@ -43,11 +43,7 @@ export default async function MomentDetailPage({
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <PageTransition className="flex-1">
-        <MomentDetail
-          moment={moment}
-          authorName={siteConfig.authorName}
-          avatarUrl={siteConfig.avatarUrl}
-        />
+        <MomentDetail moment={moment} />
       </PageTransition>
     </div>
   );

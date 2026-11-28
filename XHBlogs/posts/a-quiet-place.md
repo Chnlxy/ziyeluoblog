@@ -2,6 +2,7 @@
 title: "安静的一隅"
 description: "关于这个博客以后想成为什么样子。"
 date: "2026-11-25"
+author: "codex"
 tags: ["日常", "幻想郷"]
 cover: "/images/covers/default-cover.svg"
 ---

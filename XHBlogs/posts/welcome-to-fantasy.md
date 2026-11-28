@@ -2,6 +2,7 @@
 title: "欢迎来到幻想郷"
 description: "站点初版完成时留下的一段说明。"
 date: "2026-11-27"
+author: "codex"
 tags: ["站点", "随笔"]
 cover: "/images/covers/leaf-light.svg"
 ---

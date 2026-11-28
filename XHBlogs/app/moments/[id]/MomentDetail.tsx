@@ -10,12 +10,8 @@ import type { MomentSummary } from "../../../lib/content-types";
 
 export default function MomentDetail({
   moment,
-  authorName,
-  avatarUrl,
 }: {
   moment: MomentSummary;
-  authorName: string;
-  avatarUrl: string;
 }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -32,12 +28,12 @@ export default function MomentDetail({
       <article className="glass-card mt-6 overflow-hidden p-6 sm:p-8 md:p-10">
         <header className="flex items-center gap-4 border-b border-white/10 pb-6">
           <img
-            src={avatarUrl}
+            src={moment.author.avatarUrl}
             alt=""
             className="h-14 w-14 rounded-2xl object-cover"
           />
           <div className="min-w-0">
-            <h1 className="text-xl font-black text-white">{authorName}</h1>
+            <h1 className="text-xl font-black text-white">{moment.author.name}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold">
               <time
                 dateTime={moment.date}

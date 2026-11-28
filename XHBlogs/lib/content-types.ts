@@ -1,3 +1,5 @@
+import type { ContentAuthorProfile } from "../data/authors";
+
 export interface PostSummary {
   slug: string;
   title: string;
@@ -5,6 +7,7 @@ export interface PostSummary {
   date: string;
   tags: string[];
   cover: string;
+  author: ContentAuthorProfile;
 }
 
 export interface MomentSummary {
@@ -13,4 +16,5 @@ export interface MomentSummary {
   location: string;
   images: string[];
   content: string;
+  author: ContentAuthorProfile;
 }

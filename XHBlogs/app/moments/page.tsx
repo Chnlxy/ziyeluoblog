@@ -16,11 +16,7 @@ export default function MomentsPage() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <PageTransition className="flex-1">
-        <MomentList
-          moments={getMoments()}
-          authorName={siteConfig.authorName}
-          avatarUrl={siteConfig.avatarUrl}
-        />
+        <MomentList moments={getMoments()} />
       </PageTransition>
     </div>
   );

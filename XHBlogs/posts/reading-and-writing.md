@@ -2,6 +2,7 @@
 title: "最近读到的一点东西"
 description: "关于阅读、记录，以及为什么想重新写博客。"
 date: "2026-11-26"
+author: "codex"
 tags: ["阅读", "记录"]
 cover: "/images/covers/leaf-dark.svg"
 ---
