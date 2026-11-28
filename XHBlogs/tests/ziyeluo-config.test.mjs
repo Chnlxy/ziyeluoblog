@@ -305,6 +305,46 @@ test("keeps the closed search below the desktop navigation", () => {
   );
 });
 
+test("provides compact keyboard search with an archive fallback", () => {
+  const searchBar = fs.readFileSync(
+    path.join(root, "components", "SearchBar.tsx"),
+    "utf8",
+  );
+
+  assert.match(searchBar, /max-w-\[28rem\]/);
+  assert.match(searchBar, /useRouter/);
+  assert.match(searchBar, /\/timeline\?q=/);
+  assert.match(searchBar, /slice\(0,\s*6\)/);
+  assert.match(searchBar, /onKeyDown/);
+  assert.match(searchBar, /ArrowDown/);
+  assert.match(searchBar, /ArrowUp/);
+  assert.match(searchBar, /Escape/);
+  assert.match(searchBar, /role="combobox"/);
+  assert.match(searchBar, /aria-activedescendant/);
+  assert.match(searchBar, /查看全部结果/);
+});
+
+test("filters the timeline from the archive query", () => {
+  const timeline = fs.readFileSync(
+    path.join(root, "app", "timeline", "page.tsx"),
+    "utf8",
+  );
+  const archivePath = path.join(
+    root,
+    "components",
+    "TimelineArchive.tsx",
+  );
+
+  assert.ok(fs.existsSync(archivePath));
+  const archive = fs.readFileSync(archivePath, "utf8");
+  assert.match(timeline, /Suspense/);
+  assert.match(timeline, /<TimelineArchive/);
+  assert.match(archive, /useSearchParams/);
+  assert.match(archive, /get\(["']q["']\)/);
+  assert.match(archive, /filterPosts/);
+  assert.match(archive, /filteredPosts/);
+});
+
 test("keeps desktop navigation and layout on fine-pointer devices", () => {
   const styles = fs.readFileSync(
     path.join(root, "app", "globals.css"),
