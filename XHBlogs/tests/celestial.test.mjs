@@ -110,3 +110,25 @@ test("renders the celestial sphere in the globe scene", () => {
     /className="relative h-full w-full overflow-hidden rounded-\[2rem\]"/,
   );
 });
+
+test("adds a desktop-only atmospheric cloud layer", () => {
+  const atmospherePath = path.join(
+    root,
+    "components",
+    "EarthAtmosphere.tsx",
+  );
+  assert.ok(fs.existsSync(atmospherePath));
+
+  const atmosphere = fs.readFileSync(atmospherePath, "utf8");
+  const globe = fs.readFileSync(
+    path.join(root, "components", "TravelGlobe.tsx"),
+    "utf8",
+  );
+
+  assert.match(atmosphere, /fbm|fractalNoise/);
+  assert.match(atmosphere, /transparent/);
+  assert.match(atmosphere, /depthWrite:\s*false/);
+  assert.match(atmosphere, /sunDirection/);
+  assert.match(atmosphere, /renderOrder=\{-1\}/);
+  assert.match(globe, /desktopTextures && <EarthAtmosphere/);
+});

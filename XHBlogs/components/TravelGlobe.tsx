@@ -31,6 +31,7 @@ import {
   solarDirection,
 } from "../lib/travel";
 import CelestialSphere from "./CelestialSphere";
+import EarthAtmosphere from "./EarthAtmosphere";
 
 const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
@@ -716,6 +717,7 @@ function TravelScene({
           onReady={onTexturesReady}
         />
       </Suspense>
+      {desktopTextures && <EarthAtmosphere sun={sun} />}
       <Marker
         id="hangzhou"
         label="杭州 · 起点"
