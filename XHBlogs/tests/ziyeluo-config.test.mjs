@@ -850,11 +850,27 @@ test("lays out footprint details without covering page text", () => {
   );
   assert.match(
     styles,
-    /@media \(min-width: 1280px\)[\s\S]*\.footprints-layout--panel-open\s+\.travel-detail-motion\s*\{[\s\S]*position:\s*absolute;/,
+    /@media \(min-width: 1280px\)[\s\S]*?\.travel-detail-motion\s*\{[\s\S]*?position:\s*absolute;/,
   );
   assert.match(panel, /className="travel-detail-panel/);
   assert.doesNotMatch(panel, /fixed inset-x-3 bottom-3/);
   assert.doesNotMatch(panel, /document\.body\.style\.overflow = "hidden"/);
+});
+
+test("keeps the closing detail panel in its overlay position", () => {
+  const styles = fs.readFileSync(
+    path.join(root, "app", "globals.css"),
+    "utf8",
+  );
+
+  assert.match(
+    styles,
+    /@media \(min-width: 1280px\)[\s\S]*?\.travel-detail-motion\s*\{[\s\S]*?position:\s*absolute;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /\.footprints-layout--panel-open\s+\.travel-detail-motion/,
+  );
 });
 
 test("keeps footprints content vertically fixed during entry", () => {

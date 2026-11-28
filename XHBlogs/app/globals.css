@@ -224,7 +224,7 @@
     transform: translateX(-102.5px);
   }
 
-  .footprints-layout--panel-open .travel-detail-motion {
+  .travel-detail-motion {
     position: absolute;
     top: 0;
     right: 0;
