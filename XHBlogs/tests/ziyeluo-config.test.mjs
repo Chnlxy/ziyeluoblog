@@ -687,6 +687,28 @@ test("ships a real 3D travel globe with local earth textures", () => {
   assert.match(globe, /cylinderGeometry/);
   assert.match(globe, /MARKER_BEAM_HEIGHT/);
   assert.match(globe, /const MARKER_BEAM_HEIGHT = 0\.07;/);
+  assert.match(globe, /const MARKER_BEAM_TOP_RADIUS = 0\.0025;/);
+  assert.match(globe, /const MARKER_BEAM_BASE_RADIUS = 0\.0055;/);
+  assert.match(globe, /const MARKER_CAP_RADIUS = 0\.0085;/);
+  assert.match(globe, /const MARKER_SURFACE_DOT_RADIUS = 0\.009;/);
+  assert.match(globe, /const MARKER_LABEL_STAGGER = 0\.09;/);
+  assert.match(
+    globe,
+    /args=\{\[\s*MARKER_BEAM_TOP_RADIUS,\s*MARKER_BEAM_BASE_RADIUS,\s*MARKER_BEAM_HEIGHT,/,
+  );
+  assert.match(
+    globe,
+    /assignMarkerLabelTiers\(\[\s*hangzhouHome\.coordinates,\s*\.\.\.places\.map/,
+  );
+  assert.match(globe, /labelTier=\{labelTiers\[index \+ 1\]\}/);
+  assert.match(globe, /labelTier \* MARKER_LABEL_STAGGER/);
+  const labelHeight = Number(
+    globe.match(/const MARKER_LABEL_HEIGHT = ([\d.]+);/)?.[1],
+  );
+  const labelStagger = Number(
+    globe.match(/const MARKER_LABEL_STAGGER = ([\d.]+);/)?.[1],
+  );
+  assert.ok(labelStagger >= labelHeight);
   assert.match(globe, /const MARKER_SURFACE_RADIUS = 1\.003;/);
   assert.equal(
     (globe.match(/radius=\{MARKER_SURFACE_RADIUS\}/g) ?? []).length,

@@ -22,6 +22,7 @@ import {
 import {
   type TravelPlace,
   advanceMarkerOpacity,
+  assignMarkerLabelTiers,
   cameraPositionForRoute,
   hangzhouHome,
   latLngToVector3,
@@ -38,7 +39,13 @@ const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-medium.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-medium.jpg";
 const MARKER_BEAM_HEIGHT = 0.07;
-const MARKER_CAP_RADIUS = 0.018;
+const MARKER_BEAM_TOP_RADIUS = 0.0025;
+const MARKER_BEAM_BASE_RADIUS = 0.0055;
+const MARKER_CAP_RADIUS = 0.0085;
+const MARKER_SURFACE_DOT_RADIUS = 0.009;
+const MARKER_LABEL_WIDTH = 0.28;
+const MARKER_LABEL_HEIGHT = 0.07;
+const MARKER_LABEL_STAGGER = 0.09;
 const MARKER_SURFACE_RADIUS = 1.003;
 
 const vertexShader = `
@@ -303,6 +310,7 @@ interface MarkerProps {
   selected: boolean;
   focused: boolean;
   selectable: boolean;
+  labelTier: number;
   onSelect?: (id: string) => void;
 }
 
@@ -314,6 +322,7 @@ function Marker({
   selected,
   focused,
   selectable,
+  labelTier,
   onSelect,
 }: MarkerProps) {
   const group = useRef<THREE.Group>(null);
@@ -429,7 +438,7 @@ function Marker({
           document.body.style.cursor = "";
         }}
       >
-        <sphereGeometry args={[0.012, 14, 14]} />
+        <sphereGeometry args={[MARKER_SURFACE_DOT_RADIUS, 14, 14]} />
         <meshBasicMaterial
           ref={baseMaterial}
           color={color}
@@ -455,7 +464,14 @@ function Marker({
         }}
       >
         <cylinderGeometry
-          args={[0.006, 0.011, MARKER_BEAM_HEIGHT, 10, 1, true]}
+          args={[
+            MARKER_BEAM_TOP_RADIUS,
+            MARKER_BEAM_BASE_RADIUS,
+            MARKER_BEAM_HEIGHT,
+            10,
+            1,
+            true,
+          ]}
         />
         <meshBasicMaterial
           ref={beamMaterial}
@@ -492,8 +508,14 @@ function Marker({
         />
       </mesh>
       <sprite
-        position={[0, MARKER_BEAM_HEIGHT + 0.07, 0]}
-        scale={[0.32, 0.08, 1]}
+        position={[
+          0,
+          MARKER_BEAM_HEIGHT +
+            MARKER_LABEL_HEIGHT +
+            labelTier * MARKER_LABEL_STAGGER,
+          0,
+        ]}
+        scale={[MARKER_LABEL_WIDTH, MARKER_LABEL_HEIGHT, 1]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
@@ -668,6 +690,14 @@ function TravelScene({
 
   const selected = places.find((place) => place.id === selectedId) || null;
   const focused = places.find((place) => place.id === focusedId) || null;
+  const labelTiers = useMemo(
+    () =>
+      assignMarkerLabelTiers([
+        hangzhouHome.coordinates,
+        ...places.map((place) => place.coordinates),
+      ]),
+    [places],
+  );
   const [focusCancelled, setFocusCancelled] = useState(false);
   const [earthDayTexture, setEarthDayTexture] = useState<{
     texture: THREE.Texture;
@@ -749,8 +779,9 @@ function TravelScene({
         selected={false}
         focused={false}
         selectable={false}
+        labelTier={labelTiers[0]}
       />
-      {places.map((place) => (
+      {places.map((place, index) => (
         <Marker
           key={place.id}
           id={place.id}
@@ -760,6 +791,7 @@ function TravelScene({
           selected={place.id === selectedId}
           focused={place.id === focusedId}
           selectable
+          labelTier={labelTiers[index + 1]}
           onSelect={onSelect}
         />
       ))}

@@ -201,6 +201,38 @@ export function latLngToVector3(
   ];
 }
 
+const MARKER_LABEL_PROXIMITY = 0.08;
+
+export function assignMarkerLabelTiers(
+  coordinates: ReadonlyArray<readonly [number, number]>,
+) {
+  const positions = coordinates.map((coordinate) =>
+    latLngToVector3([coordinate[0], coordinate[1]]),
+  );
+  const tiers: number[] = [];
+
+  for (const [index, position] of positions.entries()) {
+    const occupied = new Set<number>();
+    for (let previous = 0; previous < index; previous += 1) {
+      const other = positions[previous];
+      const distance = Math.hypot(
+        position[0] - other[0],
+        position[1] - other[1],
+        position[2] - other[2],
+      );
+      if (distance < MARKER_LABEL_PROXIMITY) {
+        occupied.add(tiers[previous]);
+      }
+    }
+
+    let tier = 0;
+    while (occupied.has(tier)) tier += 1;
+    tiers.push(tier);
+  }
+
+  return tiers;
+}
+
 function dot(
   left: [number, number, number],
   right: [number, number, number],
