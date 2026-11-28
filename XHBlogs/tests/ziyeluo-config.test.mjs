@@ -80,11 +80,23 @@ test("ships the first-version placeholder content", () => {
   assert.deepEqual(posts, [
     "a-quiet-place.md",
     "reading-and-writing.md",
+    "the-beginning.md",
     "welcome-to-fantasy.md",
   ]);
   assert.equal(moments.length, 5);
   assert.ok(fs.existsSync(path.join(root, "public", "avatar-placeholder.svg")));
   assert.ok(fs.existsSync(path.join(root, "public", "images", "covers", "default-cover.svg")));
+  assert.ok(
+    fs.existsSync(
+      path.join(root, "public", "images", "covers", "the-beginning.webp"),
+    ),
+  );
+  const firstPost = fs.readFileSync(
+    path.join(root, "posts", "the-beginning.md"),
+    "utf8",
+  );
+  assert.match(firstPost, /title:\s*["']故事的开始["']/);
+  assert.match(firstPost, /cover:\s*["']\/images\/covers\/the-beginning\.webp["']/);
 });
 
 test("removes upstream private profile copy from active content", () => {

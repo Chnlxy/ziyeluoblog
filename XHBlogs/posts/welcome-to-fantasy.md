@@ -1,6 +1,6 @@
 ---
 title: "欢迎来到幻想郷"
-description: "第一篇文章，也是一段新旅程的开始。"
+description: "站点初版完成时留下的一段说明。"
 date: "2026-11-27"
 tags: ["站点", "随笔"]
 cover: "/images/covers/leaf-light.svg"
