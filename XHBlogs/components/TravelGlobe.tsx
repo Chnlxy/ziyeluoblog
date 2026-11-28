@@ -244,10 +244,12 @@ function Earth({
   sun,
   desktopTextures,
   onReady,
+  onDayTextureReady,
 }: {
   sun: [number, number, number];
   desktopTextures: boolean;
   onReady: () => void;
+  onDayTextureReady: (texture: THREE.Texture) => void;
 }) {
   const mobile = !desktopTextures;
   const [dayMap, nightMap] = useLoader(THREE.TextureLoader, [
@@ -273,8 +275,13 @@ function Earth({
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = mobile ? 2 : 4;
     }
+    if (!mobile) {
+      dayMap.wrapS = THREE.RepeatWrapping;
+      dayMap.wrapT = THREE.ClampToEdgeWrapping;
+    }
+    onDayTextureReady(dayMap);
     onReady();
-  }, [dayMap, mobile, nightMap, onReady]);
+  }, [dayMap, mobile, nightMap, onDayTextureReady, onReady]);
 
   useEffect(() => {
     material.uniforms.sunDirection.value.set(...sun);
@@ -666,6 +673,20 @@ function TravelScene({
   const selected = places.find((place) => place.id === selectedId) || null;
   const focused = places.find((place) => place.id === focusedId) || null;
   const [focusCancelled, setFocusCancelled] = useState(false);
+  const [earthDayTexture, setEarthDayTexture] = useState<{
+    texture: THREE.Texture;
+    desktop: boolean;
+  } | null>(null);
+  const handleDayTextureReady = useCallback(
+    (texture: THREE.Texture) => {
+      setEarthDayTexture({ texture, desktop: desktopTextures });
+    },
+    [desktopTextures],
+  );
+  const activeEarthDayTexture =
+    earthDayTexture?.desktop === desktopTextures
+      ? earthDayTexture.texture
+      : null;
   const [outgoingRoute, setOutgoingRoute] = useState<{
     key: string;
     destination: [number, number];
@@ -715,9 +736,15 @@ function TravelScene({
           sun={sun}
           desktopTextures={desktopTextures}
           onReady={onTexturesReady}
+          onDayTextureReady={handleDayTextureReady}
         />
       </Suspense>
-      {desktopTextures && <EarthAtmosphere sun={sun} />}
+      {desktopTextures && activeEarthDayTexture && (
+        <EarthAtmosphere
+          sun={sun}
+          earthDayTexture={activeEarthDayTexture}
+        />
+      )}
       <Marker
         id="hangzhou"
         label="杭州 · 起点"

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
+
+import { gibsCloudMapUrl } from "../lib/earthClouds";
 
 const atmosphereVertexShader = `
   varying vec2 vUv;
@@ -19,56 +20,31 @@ const atmosphereVertexShader = `
 `;
 
 const atmosphereFragmentShader = `
-  uniform float uTime;
+  uniform float uHasClouds;
+  uniform sampler2D cloudMap;
+  uniform sampler2D earthDayMap;
   uniform vec3 sunDirection;
   varying vec2 vUv;
   varying vec3 vWorldNormal;
   varying vec3 vViewDirection;
 
-  float hash(vec2 point) {
-    return fract(
-      sin(dot(point, vec2(127.1, 311.7))) * 43758.5453123
-    );
-  }
-
-  float noise(vec2 point) {
-    vec2 cell = floor(point);
-    vec2 local = fract(point);
-    local = local * local * (3.0 - 2.0 * local);
-    return mix(
-      mix(
-        hash(cell),
-        hash(cell + vec2(1.0, 0.0)),
-        local.x
-      ),
-      mix(
-        hash(cell + vec2(0.0, 1.0)),
-        hash(cell + vec2(1.0, 1.0)),
-        local.x
-      ),
-      local.y
-    );
-  }
-
-  float fbm(vec2 point) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    for (int octave = 0; octave < 5; octave++) {
-      value += noise(point) * amplitude;
-      point = point * 2.03 + vec2(17.1, 9.2);
-      amplitude *= 0.5;
-    }
-    return value;
-  }
-
   void main() {
-    vec2 flow = vec2(uTime * 0.002, uTime * 0.0007);
-    vec2 cloudUv = vec2(vUv.x * 11.0, vUv.y * 6.0) + flow;
-    float broad = fbm(cloudUv);
-    float detail = fbm(cloudUv * 2.7 + broad * 1.8);
-    float latitude = abs(vUv.y - 0.5) * 2.0;
-    float cloud = smoothstep(0.5, 0.76, broad * 0.72 + detail * 0.4);
-    cloud *= 1.0 - smoothstep(0.82, 1.0, latitude) * 0.55;
+    vec3 satelliteColor = texture2D(cloudMap, vUv).rgb;
+    vec3 groundColor = texture2D(earthDayMap, vUv).rgb;
+    float satelliteLuma = dot(
+      satelliteColor,
+      vec3(0.299, 0.587, 0.114)
+    );
+    float groundLuma = dot(groundColor, vec3(0.299, 0.587, 0.114));
+    float cloudDelta = satelliteLuma - groundLuma;
+    float spread =
+      max(satelliteColor.r, max(satelliteColor.g, satelliteColor.b)) -
+      min(satelliteColor.r, min(satelliteColor.g, satelliteColor.b));
+    float cloud =
+      smoothstep(0.05, 0.22, cloudDelta) *
+      (1.0 - smoothstep(0.22, 0.55, spread)) *
+      smoothstep(0.015, 0.08, satelliteLuma);
+    cloud *= uHasClouds;
 
     vec3 normal = normalize(vWorldNormal);
     float sunlight = smoothstep(
@@ -84,47 +60,95 @@ const atmosphereFragmentShader = `
     vec3 nightCloud = vec3(0.15, 0.2, 0.27);
     vec3 dayCloud = vec3(0.93, 0.95, 0.92);
     vec3 cloudColor = mix(nightCloud, dayCloud, sunlight);
-    float alpha = cloud * mix(0.035, 0.19, sunlight);
+    float alpha = cloud * mix(0.045, 0.2, sunlight);
     alpha += rim * mix(0.015, 0.075, sunlight);
 
     gl_FragColor = vec4(cloudColor, alpha);
   }
 `;
 
+function configureTexture(texture: THREE.Texture) {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.anisotropy = 4;
+}
+
 export default function EarthAtmosphere({
   sun,
+  earthDayTexture,
 }: {
   sun: [number, number, number];
+  earthDayTexture: THREE.Texture;
 }) {
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        uniforms: {
-          uTime: { value: 0 },
-          sunDirection: { value: new THREE.Vector3(...sun) },
-        },
-        vertexShader: atmosphereVertexShader,
-        fragmentShader: atmosphereFragmentShader,
-        transparent: true,
-        depthTest: true,
-        depthWrite: false,
-        side: THREE.FrontSide,
-        blending: THREE.NormalBlending,
-      }),
-    [],
-  );
+  const resources = useMemo(() => {
+    const placeholderTexture = new THREE.DataTexture(
+      new Uint8Array([0, 0, 0, 0]),
+      1,
+      1,
+    );
+    placeholderTexture.needsUpdate = true;
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uHasClouds: { value: 0 },
+        cloudMap: { value: placeholderTexture },
+        earthDayMap: { value: earthDayTexture },
+        sunDirection: { value: new THREE.Vector3(...sun) },
+      },
+      vertexShader: atmosphereVertexShader,
+      fragmentShader: atmosphereFragmentShader,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+      side: THREE.FrontSide,
+      blending: THREE.NormalBlending,
+    });
+
+    return { material, placeholderTexture };
+  }, [earthDayTexture]);
+  const { material, placeholderTexture } = resources;
 
   useEffect(() => {
     material.uniforms.sunDirection.value.set(...sun);
   }, [material, sun]);
 
-  useEffect(() => () => material.dispose(), [material]);
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    let cloudTexture: THREE.Texture | null = null;
+    let cancelled = false;
 
-  const elapsed = useRef(0);
-  useFrame((_, delta) => {
-    elapsed.current += delta;
-    material.uniforms.uTime.value = elapsed.current;
-  });
+    loader.load(
+      gibsCloudMapUrl(),
+      (texture) => {
+        if (cancelled) {
+          texture.dispose();
+          return;
+        }
+        configureTexture(texture);
+        cloudTexture = texture;
+        material.uniforms.cloudMap.value = texture;
+        material.uniforms.uHasClouds.value = 1;
+      },
+      undefined,
+      () => {
+        // Keep the normal-based atmosphere visible if NASA is offline.
+      },
+    );
+
+    return () => {
+      cancelled = true;
+      cloudTexture?.dispose();
+    };
+  }, [material]);
+
+  useEffect(
+    () => () => {
+      material.dispose();
+      placeholderTexture.dispose();
+    },
+    [material, placeholderTexture],
+  );
 
   return (
     <mesh scale={1.006} renderOrder={-1}>

@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 
 import { brightStars } from "../data/brightStars.ts";
 import { buildCelestialSnapshot } from "../lib/celestial.ts";
+import {
+  gibsCloudMapUrl,
+  latestCloudObservationDate,
+} from "../lib/earthClouds.ts";
 import { solarDirection } from "../lib/travel.ts";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -125,10 +129,47 @@ test("adds a desktop-only atmospheric cloud layer", () => {
     "utf8",
   );
 
-  assert.match(atmosphere, /fbm|fractalNoise/);
+  assert.match(atmosphere, /cloudMap/);
+  assert.match(atmosphere, /earthDayMap/);
+  assert.match(atmosphere, /RepeatWrapping/);
+  assert.match(atmosphere, /uHasClouds/);
+  assert.match(atmosphere, /earthDayTexture/);
+  assert.doesNotMatch(atmosphere, /earthDayUrl/);
+  assert.doesNotMatch(atmosphere, /loadTexture\(earthDay/);
+  assert.doesNotMatch(atmosphere, /fbm|fractalNoise/);
   assert.match(atmosphere, /transparent/);
   assert.match(atmosphere, /depthWrite:\s*false/);
   assert.match(atmosphere, /sunDirection/);
   assert.match(atmosphere, /renderOrder=\{-1\}/);
-  assert.match(globe, /desktopTextures && <EarthAtmosphere/);
+  assert.match(
+    globe,
+    /desktopTextures &&\s*activeEarthDayTexture && \([\s\S]*<EarthAtmosphere[\s\S]*earthDayTexture=\{activeEarthDayTexture\}/,
+  );
+  assert.match(globe, /onDayTextureReady=\{handleDayTextureReady\}/);
+});
+
+test("selects the latest complete UTC observation day", () => {
+  assert.equal(
+    latestCloudObservationDate(new Date("2026-11-28T00:01:00Z")),
+    "2026-11-26",
+  );
+  assert.equal(
+    latestCloudObservationDate(new Date("2026-12-01T23:59:00Z")),
+    "2026-11-29",
+  );
+});
+
+test("builds a global NASA GIBS cloud-map request", () => {
+  const url = gibsCloudMapUrl(new Date("2026-11-28T12:00:00Z"));
+
+  assert.match(
+    url,
+    /VIIRS_NOAA20_CorrectedReflectance_TrueColor/,
+  );
+  assert.match(url, /TIME=2026-11-26/);
+  assert.match(url, /CRS=EPSG%3A4326/);
+  assert.match(url, /BBOX=-90%2C-180%2C90%2C180/);
+  assert.match(url, /WIDTH=2048/);
+  assert.match(url, /HEIGHT=1024/);
+  assert.match(url, /FORMAT=image%2Fjpeg/);
 });
