@@ -11,6 +11,7 @@ export interface TravelPlace {
   name: string;
   country: string;
   coordinates: [longitude: number, latitude: number];
+  labelPriority?: number;
   visits: TravelVisit[];
 }
 
@@ -29,6 +30,13 @@ export const hangzhouHome = {
 };
 
 export const ROUTE_FADE_DURATION_SECONDS = 0.45;
+export const DEFAULT_LABEL_PRIORITY = 40;
+
+export function travelPlaceLabelPriority(
+  place: Pick<TravelPlace, "labelPriority">,
+) {
+  return place.labelPriority ?? DEFAULT_LABEL_PRIORITY;
+}
 
 const idPattern = /^[a-z0-9-]+$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -103,6 +111,12 @@ function validatePlace(place: TravelPlace, index: number) {
   }
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
     throw new Error(`${prefix}的纬度必须在 -90 到 90 之间`);
+  }
+  if (
+    place.labelPriority !== undefined &&
+    (!Number.isFinite(place.labelPriority) || place.labelPriority <= 0)
+  ) {
+    throw new Error(`${prefix}的标签优先级必须是正数`);
   }
   if (!Array.isArray(place.visits) || place.visits.length === 0) {
     throw new Error(`${prefix}至少需要一条到访记录`);

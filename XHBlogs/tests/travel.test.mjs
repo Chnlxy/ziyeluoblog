@@ -15,6 +15,7 @@ import {
   routeFadeOpacity,
   sampleGreatCircleArc,
   solarDirection,
+  travelPlaceLabelPriority,
   validateTravelPlaces,
 } from "../lib/travel.ts";
 import { travelPlaces } from "../data/travel.ts";
@@ -36,6 +37,21 @@ const tokyo = {
 
 test("accepts a valid travel place", () => {
   assert.doesNotThrow(() => validateTravelPlaces([tokyo]));
+  assert.equal(travelPlaceLabelPriority({}), 40);
+});
+
+test("rejects invalid label priorities", () => {
+  assert.throws(
+    () => validateTravelPlaces([{ ...tokyo, labelPriority: 0 }]),
+    /标签优先级/,
+  );
+  assert.throws(
+    () =>
+      validateTravelPlaces([
+        { ...tokyo, labelPriority: Number.NaN },
+      ]),
+    /标签优先级/,
+  );
 });
 
 test("rejects duplicate IDs and invalid locations", () => {
@@ -221,6 +237,21 @@ test("includes the requested travel destinations and month precision", () => {
   assert.equal(
     requested.get("shanghai").visits[0].datePrecision,
     "day",
+  );
+  assert.deepEqual(
+    Object.fromEntries(
+      travelPlaces.map((place) => [
+        place.id,
+        place.labelPriority,
+      ]),
+    ),
+    {
+      bali: 40,
+      brunei: 40,
+      osaka: 60,
+      tokyo: 80,
+      shanghai: 60,
+    },
   );
 });
 
