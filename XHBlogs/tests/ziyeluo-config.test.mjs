@@ -687,10 +687,11 @@ test("ships a real 3D travel globe with local earth textures", () => {
   assert.match(globe, /cylinderGeometry/);
   assert.match(globe, /MARKER_BEAM_HEIGHT/);
   assert.match(globe, /const MARKER_BEAM_HEIGHT = 0\.07;/);
-  assert.match(globe, /const MARKER_BEAM_TOP_RADIUS = 0\.0025;/);
-  assert.match(globe, /const MARKER_BEAM_BASE_RADIUS = 0\.0055;/);
-  assert.match(globe, /const MARKER_CAP_RADIUS = 0\.0085;/);
-  assert.match(globe, /const MARKER_SURFACE_DOT_RADIUS = 0\.009;/);
+  assert.match(globe, /const MARKER_BEAM_TOP_RADIUS = 0\.0012;/);
+  assert.match(globe, /const MARKER_BEAM_BASE_RADIUS = 0\.0026;/);
+  assert.match(globe, /const MARKER_CAP_RADIUS = 0\.005;/);
+  assert.match(globe, /const MARKER_SURFACE_DOT_RADIUS = 0\.006;/);
+  assert.match(globe, /const MARKER_HIT_RADIUS = 0\.018;/);
   assert.match(globe, /const MARKER_LABEL_STAGGER = 0\.09;/);
   assert.match(
     globe,
@@ -709,6 +710,12 @@ test("ships a real 3D travel globe with local earth textures", () => {
     globe.match(/const MARKER_LABEL_STAGGER = ([\d.]+);/)?.[1],
   );
   assert.ok(labelStagger >= labelHeight);
+  assert.equal(
+    (globe.match(/blending=\{THREE\.AdditiveBlending\}/g) ?? []).length,
+    3,
+  );
+  assert.equal((globe.match(/toneMapped=\{false\}/g) ?? []).length, 3);
+  assert.equal((globe.match(/colorWrite=\{false\}/g) ?? []).length, 1);
   assert.match(globe, /const MARKER_SURFACE_RADIUS = 1\.003;/);
   assert.equal(
     (globe.match(/radius=\{MARKER_SURFACE_RADIUS\}/g) ?? []).length,

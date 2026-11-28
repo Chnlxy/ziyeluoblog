@@ -39,10 +39,11 @@ const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-medium.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-medium.jpg";
 const MARKER_BEAM_HEIGHT = 0.07;
-const MARKER_BEAM_TOP_RADIUS = 0.0025;
-const MARKER_BEAM_BASE_RADIUS = 0.0055;
-const MARKER_CAP_RADIUS = 0.0085;
-const MARKER_SURFACE_DOT_RADIUS = 0.009;
+const MARKER_BEAM_TOP_RADIUS = 0.0012;
+const MARKER_BEAM_BASE_RADIUS = 0.0026;
+const MARKER_CAP_RADIUS = 0.005;
+const MARKER_SURFACE_DOT_RADIUS = 0.006;
+const MARKER_HIT_RADIUS = 0.018;
 const MARKER_LABEL_WIDTH = 0.28;
 const MARKER_LABEL_HEIGHT = 0.07;
 const MARKER_LABEL_STAGGER = 0.09;
@@ -424,6 +425,39 @@ function Marker({
       quaternion={orientation}
     >
       <mesh
+        position={[0, MARKER_BEAM_HEIGHT / 2, 0]}
+        onClick={(event: ThreeEvent<MouseEvent>) => {
+          event.stopPropagation();
+          if (selectable && onSelect) onSelect(id);
+        }}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = selectable ? "pointer" : "default";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "";
+        }}
+      >
+        <cylinderGeometry
+          args={[
+            MARKER_HIT_RADIUS,
+            MARKER_HIT_RADIUS,
+            MARKER_BEAM_HEIGHT,
+            8,
+            1,
+            true,
+          ]}
+        />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          colorWrite={false}
+        />
+      </mesh>
+      <mesh
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
@@ -445,6 +479,8 @@ function Marker({
           transparent
           opacity={0.8}
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          toneMapped={false}
         />
       </mesh>
       <mesh
@@ -480,6 +516,7 @@ function Marker({
           opacity={0.72}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
+          toneMapped={false}
         />
       </mesh>
       <mesh
@@ -505,6 +542,8 @@ function Marker({
           transparent
           opacity={0.8}
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          toneMapped={false}
         />
       </mesh>
       <sprite

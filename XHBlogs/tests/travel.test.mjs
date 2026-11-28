@@ -343,15 +343,14 @@ test("keeps the marker fully visible while its cap is visible", () => {
   const markerBase = latLngToVector3([0, 0], 1.003);
   const cameraAt = (x) => [x, Math.sqrt(9 - x ** 2), 0];
   const visibilityAt = (x) =>
-    markerHorizonVisibility(markerBase, cameraAt(x), 0.07, 0.0085);
+    markerHorizonVisibility(markerBase, cameraAt(x), 0.07, 0.005);
 
   assert.equal(visibilityAt(1), 1);
-  assert.equal(visibilityAt(0.909), 1);
-  assert.equal(visibilityAt(0.9085), 1);
-  assert.equal(visibilityAt(0.908), 0);
+  assert.equal(visibilityAt(0.919), 1);
+  assert.equal(visibilityAt(0.9175), 0);
   assert.equal(visibilityAt(0), 0);
   assert.equal(
-    markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07, 0.0085),
+    markerHorizonVisibility(markerBase, [-3, 0, 0], 0.07, 0.005),
     0,
   );
 });
