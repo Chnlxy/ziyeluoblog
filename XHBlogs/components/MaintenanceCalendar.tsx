@@ -1,5 +1,6 @@
 import {
   buildMaintenanceCalendar,
+  buildMaintenanceStats,
   type MaintenanceEntry,
 } from "../lib/maintenance";
 
@@ -26,6 +27,24 @@ export default function MaintenanceCalendar({
   entries: MaintenanceEntry[];
 }) {
   const calendar = buildMaintenanceCalendar(entries);
+  const stats = buildMaintenanceStats(entries);
+  const kindRows = [
+    {
+      label: "站点",
+      count: stats.kindCounts.site,
+      barClass: "bg-[#eadc9d]",
+    },
+    {
+      label: "文章",
+      count: stats.kindCounts.post,
+      barClass: "bg-[#93b58a]",
+    },
+    {
+      label: "说说",
+      count: stats.kindCounts.moment,
+      barClass: "bg-[#7ca8c9]",
+    },
+  ];
   let previousMonth = -1;
   const monthLabels = calendar.weeks.map((week) => {
     const month = Number(week[0].date.slice(5, 7));
@@ -35,7 +54,7 @@ export default function MaintenanceCalendar({
   });
 
   return (
-    <section className="glass-card min-w-0 p-6">
+    <section className="glass-card flex h-full min-w-0 flex-col p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-300">
@@ -108,6 +127,68 @@ export default function MaintenanceCalendar({
           />
         ))}
         <span>多</span>
+      </div>
+
+      <div className="mt-auto border-t border-white/10 pt-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3">
+            <p className="text-[10px] text-slate-500">维护天数</p>
+            <p className="mt-1 text-xl font-black text-white">
+              {stats.totalDays}
+              <span className="ml-1 text-xs text-slate-400">天</span>
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3">
+            <p className="text-[10px] text-slate-500">当前连续</p>
+            <p className="mt-1 text-xl font-black text-white">
+              {stats.currentStreak}
+              <span className="ml-1 text-xs text-slate-400">天</span>
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3">
+            <p className="text-[10px] text-slate-500">最长连续</p>
+            <p className="mt-1 text-xl font-black text-white">
+              {stats.longestStreak}
+              <span className="ml-1 text-xs text-slate-400">天</span>
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3">
+            <p className="text-[10px] text-slate-500">最活跃月份</p>
+            <p className="mt-1 text-sm font-black text-white">
+              {stats.busiestMonth}
+            </p>
+            <p className="mt-0.5 text-[10px] text-slate-500">
+              {stats.busiestMonthCount} 项记录
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-xs font-bold text-slate-300">维护构成</p>
+          <div className="mt-3 space-y-3">
+            {kindRows.map((row) => {
+              const percentage = calendar.total
+                ? Math.round((row.count / calendar.total) * 100)
+                : 0;
+              return (
+                <div key={row.label}>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-slate-400">{row.label}</span>
+                    <span className="text-slate-500">
+                      {row.count} 项 · {percentage}%
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className={`h-full rounded-full ${row.barClass}`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );

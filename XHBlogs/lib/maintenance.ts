@@ -28,6 +28,15 @@ export interface MaintenanceCalendar {
   byDate: Map<string, MaintenanceDay>;
 }
 
+export interface MaintenanceStats {
+  totalDays: number;
+  currentStreak: number;
+  longestStreak: number;
+  busiestMonth: string;
+  busiestMonthCount: number;
+  kindCounts: Record<MaintenanceKind, number>;
+}
+
 function normalizedDate(value: string) {
   return value.slice(0, 10);
 }
@@ -130,5 +139,79 @@ export function buildMaintenanceCalendar(
     weeks,
     total: days.reduce((total, day) => total + day.count, 0),
     byDate: new Map(days.map((day) => [day.date, day])),
+  };
+}
+
+function dateTimestamp(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
+export function buildMaintenanceStats(
+  entries: MaintenanceEntry[],
+  asOf = new Date(),
+): MaintenanceStats {
+  const currentDay = Date.UTC(
+    asOf.getUTCFullYear(),
+    asOf.getUTCMonth(),
+    asOf.getUTCDate(),
+  );
+  const end = currentDay + (6 - new Date(currentDay).getUTCDay()) * DAY_MS;
+  const start = end - 370 * DAY_MS;
+  const startDate = utcDateString(start);
+  const endDate = utcDateString(end);
+  const windowEntries = entries.filter(
+    (entry) => entry.date >= startDate && entry.date <= endDate,
+  );
+  const uniqueDays = [...new Set(windowEntries.map((entry) => entry.date))]
+    .sort()
+    .map(dateTimestamp);
+
+  let longestStreak = 0;
+  let rollingStreak = 0;
+  for (let index = 0; index < uniqueDays.length; index++) {
+    rollingStreak =
+      index > 0 && uniqueDays[index] - uniqueDays[index - 1] === DAY_MS
+        ? rollingStreak + 1
+        : 1;
+    longestStreak = Math.max(longestStreak, rollingStreak);
+  }
+
+  const activeDays = new Set(uniqueDays);
+  let streakCursor = currentDay;
+  if (!activeDays.has(streakCursor)) streakCursor -= DAY_MS;
+  let currentStreak = 0;
+  while (activeDays.has(streakCursor)) {
+    currentStreak += 1;
+    streakCursor -= DAY_MS;
+  }
+
+  const monthCounts = new Map<string, number>();
+  const kindCounts: Record<MaintenanceKind, number> = {
+    site: 0,
+    post: 0,
+    moment: 0,
+  };
+  for (const entry of windowEntries) {
+    const month = entry.date.slice(0, 7);
+    monthCounts.set(month, (monthCounts.get(month) ?? 0) + 1);
+    kindCounts[entry.kind] += 1;
+  }
+
+  const busiest = [...monthCounts.entries()].sort(
+    ([leftMonth, leftCount], [rightMonth, rightCount]) =>
+      rightCount - leftCount ||
+      rightMonth.localeCompare(leftMonth),
+  )[0];
+
+  return {
+    totalDays: uniqueDays.length,
+    currentStreak,
+    longestStreak,
+    busiestMonth: busiest
+      ? `${busiest[0].slice(0, 4)}年${Number(busiest[0].slice(5, 7))}月`
+      : "暂无记录",
+    busiestMonthCount: busiest?.[1] ?? 0,
+    kindCounts,
   };
 }

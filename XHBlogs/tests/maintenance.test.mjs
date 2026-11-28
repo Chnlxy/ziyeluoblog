@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildMaintenanceCalendar,
+  buildMaintenanceStats,
   createMaintenanceEntries,
 } from "../lib/maintenance.ts";
 
@@ -99,6 +100,39 @@ test("builds a 53-week calendar with four intensity levels", () => {
   assert.equal(calendar.byDate.get("2026-11-26").level, 0);
 });
 
+test("summarizes maintenance days, streaks, busiest month, and kinds", () => {
+  const entries = [
+    entry("2026-11-23", "site"),
+    entry("2026-11-25", "site"),
+    entry("2026-11-25", "post"),
+    entry("2026-11-25", "moment"),
+    entry("2026-11-26", "post"),
+    entry("2026-11-26", "moment"),
+    entry("2026-11-27", "site"),
+    entry("2026-11-27", "post"),
+    entry("2026-11-27", "moment"),
+    entry("2026-11-28", "site"),
+    entry("2026-11-28", "site"),
+  ];
+  const stats = buildMaintenanceStats(
+    entries,
+    new Date("2026-11-28T12:00:00+08:00"),
+  );
+
+  assert.deepEqual(stats, {
+    totalDays: 5,
+    currentStreak: 4,
+    longestStreak: 4,
+    busiestMonth: "2026年11月",
+    busiestMonthCount: 11,
+    kindCounts: {
+      site: 5,
+      post: 3,
+      moment: 3,
+    },
+  });
+});
+
 test("replaces recent content cards with maintenance activity", () => {
   const about = fs.readFileSync(
     path.join(root, "app", "about", "page.tsx"),
@@ -133,4 +167,12 @@ test("replaces recent content cards with maintenance activity", () => {
     styles,
     /\.maintenance-calendar-scroll\s*\{[^}]*overflow-x:\s*auto;/,
   );
+  assert.match(calendar, /维护天数/);
+  assert.match(calendar, /当前连续/);
+  assert.match(calendar, /最长连续/);
+  assert.match(calendar, /最活跃月份/);
+  assert.match(calendar, /维护构成/);
+  assert.match(calendar, /站点/);
+  assert.match(calendar, /文章/);
+  assert.match(calendar, /说说/);
 });
