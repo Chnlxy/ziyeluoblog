@@ -120,8 +120,17 @@ test("replaces recent content cards with maintenance activity", () => {
   assert.doesNotMatch(about, /最近说说/);
   assert.match(calendar, /过去一年/);
   assert.match(calendar, /maintenance-calendar-grid/);
+  assert.match(calendar, /minmax\(0,\s*1fr\)/);
   assert.match(
     styles,
-    /\.maintenance-calendar-scroll\s*\{[^}]*direction:\s*rtl;/,
+    /\.maintenance-calendar-grid\s*\{[^}]*width:\s*100%;/,
+  );
+  assert.match(
+    styles,
+    /\.maintenance-calendar-day\s*\{[^}]*width:\s*100%;[^}]*aspect-ratio:\s*1;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /\.maintenance-calendar-scroll\s*\{[^}]*overflow-x:\s*auto;/,
   );
 });

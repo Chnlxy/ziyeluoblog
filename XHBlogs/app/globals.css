@@ -125,21 +125,15 @@
 }
 
 .maintenance-calendar-scroll {
-  direction: rtl;
-  overflow-x: auto;
   padding-bottom: 0.35rem;
-}
-
-.maintenance-calendar-scroll > * {
-  direction: ltr;
 }
 
 .maintenance-calendar-months {
   display: grid;
-  min-width: max-content;
+  width: calc(100% - 1.5rem);
   height: 1rem;
   margin-left: 1.5rem;
-  gap: 3px;
+  gap: 1px;
   color: rgba(203, 213, 225, 0.55);
   font-size: 9px;
   line-height: 1rem;
@@ -154,8 +148,8 @@
   display: grid;
   width: 1rem;
   flex: 0 0 1rem;
-  grid-template-rows: repeat(7, 10px);
-  gap: 3px;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 1px;
   color: rgba(203, 213, 225, 0.48);
   font-size: 9px;
   line-height: 10px;
@@ -164,20 +158,27 @@
 
 .maintenance-calendar-grid {
   display: grid;
-  min-width: max-content;
-  grid-auto-columns: 10px;
+  width: 100%;
+  min-width: 0;
   grid-auto-flow: column;
-  grid-template-rows: repeat(7, 10px);
-  gap: 3px;
+  grid-template-rows: repeat(7, auto);
+  gap: 1px;
 }
 
 .maintenance-calendar-day {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   border: 1px solid rgba(255, 255, 255, 0.035);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.055);
+}
+
+.maintenance-calendar-day--legend {
+  width: 10px;
+  height: 10px;
+  aspect-ratio: auto;
 }
 
 .maintenance-calendar-day--level-1 {

@@ -52,7 +52,7 @@ export default function MaintenanceCalendar({
         <div
           className="maintenance-calendar-months"
           style={{
-            gridTemplateColumns: `repeat(${calendar.weeks.length}, 10px)`,
+            gridTemplateColumns: `repeat(${calendar.weeks.length}, minmax(0, 1fr))`,
           }}
           aria-hidden="true"
         >
@@ -73,8 +73,11 @@ export default function MaintenanceCalendar({
             ))}
           </div>
           <div
-            className="maintenance-calendar-grid"
+            className="maintenance-calendar-grid flex-1"
             aria-label="过去一年网站维护日历"
+            style={{
+              gridTemplateColumns: `repeat(${calendar.weeks.length}, minmax(0, 1fr))`,
+            }}
           >
             {calendar.weeks.flatMap((week) =>
               week.map((day) => {
@@ -95,12 +98,12 @@ export default function MaintenanceCalendar({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-end gap-1.5 text-[10px] text-slate-500">
+      <div className="maintenance-calendar-legend mt-4 flex items-center justify-end gap-1.5 text-[10px] text-slate-500">
         <span>少</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <span
             key={level}
-            className={`maintenance-calendar-day maintenance-calendar-day--level-${level}`}
+            className={`maintenance-calendar-day maintenance-calendar-day--legend maintenance-calendar-day--level-${level}`}
             aria-hidden="true"
           />
         ))}
