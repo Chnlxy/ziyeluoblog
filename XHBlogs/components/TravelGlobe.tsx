@@ -22,7 +22,6 @@ import {
 import {
   type TravelPlace,
   advanceMarkerOpacity,
-  assignMarkerLabelTiers,
   cameraPositionForRoute,
   hangzhouHome,
   latLngToVector3,
@@ -39,6 +38,8 @@ import {
   SELECTED_LABEL_PRIORITY,
   advanceLabelLayoutOpacity,
   isLabelInteractive,
+  markerPriorityColor,
+  markerPriorityHeight,
   resolveMarkerLabelVisibility,
 } from "../lib/markerLabels";
 import CelestialSphere from "./CelestialSphere";
@@ -48,7 +49,6 @@ const EARTH_DAY = "/images/globe/earth-day.jpg";
 const EARTH_NIGHT = "/images/globe/earth-night.jpg";
 const EARTH_DAY_MOBILE = "/images/globe/earth-day-medium.jpg";
 const EARTH_NIGHT_MOBILE = "/images/globe/earth-night-medium.jpg";
-const MARKER_BEAM_HEIGHT = 0.07;
 const MARKER_BEAM_TOP_RADIUS = 0.0012;
 const MARKER_BEAM_BASE_RADIUS = 0.0026;
 const MARKER_CAP_RADIUS = 0.005;
@@ -56,7 +56,6 @@ const MARKER_SURFACE_DOT_RADIUS = 0.006;
 const MARKER_HIT_RADIUS = 0.018;
 const MARKER_LABEL_WIDTH = 0.28;
 const MARKER_LABEL_HEIGHT = 0.07;
-const MARKER_LABEL_STAGGER = 0.09;
 const MARKER_SURFACE_RADIUS = 1.003;
 
 const vertexShader = `
@@ -323,7 +322,6 @@ interface MarkerProps {
   selected: boolean;
   focused: boolean;
   selectable: boolean;
-  labelTier: number;
   onSelect?: (id: string) => void;
 }
 
@@ -399,9 +397,9 @@ function Marker({
   selected,
   focused,
   selectable,
-  labelTier,
   onSelect,
 }: MarkerProps) {
+  const beamHeight = markerPriorityHeight(labelPriority);
   const group = useRef<THREE.Group>(null);
   const baseMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const beamMaterial = useRef<THREE.MeshBasicMaterial>(null);
@@ -432,11 +430,6 @@ function Marker({
       ),
     [normal],
   );
-  const labelY =
-    MARKER_BEAM_HEIGHT +
-    MARKER_LABEL_HEIGHT +
-    labelTier * MARKER_LABEL_STAGGER;
-
   useFrame(({ camera, gl }, delta) => {
     if (!group.current) return;
     const markerScale =
@@ -446,7 +439,7 @@ function Marker({
       markerHorizonVisibility(
         [position.x, position.y, position.z],
         [camera.position.x, camera.position.y, camera.position.z],
-        MARKER_BEAM_HEIGHT * markerScale,
+        beamHeight * markerScale,
         MARKER_CAP_RADIUS * markerScale,
       ) > 0;
     opacity.current = advanceMarkerOpacity(
@@ -477,7 +470,7 @@ function Marker({
             width,
             height,
             markerScale,
-            labelY,
+            beamHeight,
           )
         : null;
     if (rect) {
@@ -528,12 +521,10 @@ function Marker({
     [id, labelLayoutRef, labelTexture],
   );
 
-  const color =
-    selected || focused
-      ? "#fff1ad"
-      : selectable
-        ? "#e6c56d"
-        : "#b4c4a9";
+  const color = markerPriorityColor(
+    labelPriority,
+    selected || focused,
+  );
 
   return (
     <group
@@ -542,7 +533,7 @@ function Marker({
       quaternion={orientation}
     >
       <mesh
-        position={[0, MARKER_BEAM_HEIGHT / 2, 0]}
+        position={[0, beamHeight / 2, 0]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
@@ -561,7 +552,7 @@ function Marker({
           args={[
             MARKER_HIT_RADIUS,
             MARKER_HIT_RADIUS,
-            MARKER_BEAM_HEIGHT,
+            beamHeight,
             8,
             1,
             true,
@@ -601,7 +592,7 @@ function Marker({
         />
       </mesh>
       <mesh
-        position={[0, MARKER_BEAM_HEIGHT / 2, 0]}
+        position={[0, beamHeight / 2, 0]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
@@ -620,7 +611,7 @@ function Marker({
           args={[
             MARKER_BEAM_TOP_RADIUS,
             MARKER_BEAM_BASE_RADIUS,
-            MARKER_BEAM_HEIGHT,
+            beamHeight,
             10,
             1,
             true,
@@ -637,7 +628,7 @@ function Marker({
         />
       </mesh>
       <mesh
-        position={[0, MARKER_BEAM_HEIGHT, 0]}
+        position={[0, beamHeight, 0]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
           if (selectable && onSelect) onSelect(id);
@@ -664,7 +655,7 @@ function Marker({
         />
       </mesh>
       <sprite
-        position={[0, labelY, 0]}
+        position={[0, beamHeight, 0]}
         scale={[MARKER_LABEL_WIDTH, MARKER_LABEL_HEIGHT, 1]}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           if (
@@ -875,14 +866,6 @@ function TravelScene({
 
   const selected = places.find((place) => place.id === selectedId) || null;
   const focused = places.find((place) => place.id === focusedId) || null;
-  const labelTiers = useMemo(
-    () =>
-      assignMarkerLabelTiers([
-        hangzhouHome.coordinates,
-        ...places.map((place) => place.coordinates),
-      ]),
-    [places],
-  );
   const labelLayoutRef = useRef<
     Map<string, MarkerLabelLayoutEntry>
   >(new Map());
@@ -969,9 +952,8 @@ function TravelScene({
         selected={false}
         focused={false}
         selectable={false}
-        labelTier={labelTiers[0]}
       />
-      {places.map((place, index) => (
+      {places.map((place) => (
         <Marker
           key={place.id}
           id={place.id}
@@ -983,7 +965,6 @@ function TravelScene({
           selected={place.id === selectedId}
           focused={place.id === focusedId}
           selectable
-          labelTier={labelTiers[index + 1]}
           onSelect={onSelect}
         />
       ))}

@@ -3,7 +3,6 @@ import test from "node:test";
 
 import {
   advanceMarkerOpacity,
-  assignMarkerLabelTiers,
   buildTravelFallbackPlaces,
   cameraPositionForRoute,
   formatTravelDate,
@@ -339,35 +338,6 @@ test("shows markers only when they face the camera", () => {
 
   assert.equal(isMarkerFrontFacing(marker, [2.9, 0, 0]), true);
   assert.equal(isMarkerFrontFacing(marker, [-2.9, 0, 0]), false);
-});
-
-test("gives nearby city labels distinct tiers regardless of order", () => {
-  const tokyo = [139.6917, 35.6895];
-  const yokohama = [139.638, 35.4437];
-
-  const eastToSouth = assignMarkerLabelTiers([tokyo, yokohama]);
-  const southToEast = assignMarkerLabelTiers([yokohama, tokyo]);
-
-  assert.notEqual(eastToSouth[0], eastToSouth[1]);
-  assert.notEqual(southToEast[0], southToEast[1]);
-});
-
-test("keeps distant city labels on the base tier", () => {
-  const tiers = assignMarkerLabelTiers([
-    [139.6917, 35.6895],
-    [115.1889, -8.4095],
-  ]);
-
-  assert.deepEqual(tiers, [0, 0]);
-});
-
-test("separates the Hangzhou home label from nearby Shanghai", () => {
-  const tiers = assignMarkerLabelTiers([
-    hangzhouHome.coordinates,
-    [121.4737, 31.2304],
-  ]);
-
-  assert.notEqual(tiers[0], tiers[1]);
 });
 
 test("keeps the marker fully visible while its cap is visible", () => {

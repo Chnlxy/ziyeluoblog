@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   advanceLabelLayoutOpacity,
   isLabelInteractive,
+  markerPriorityColor,
+  markerPriorityHeight,
   resolveMarkerLabelVisibility,
 } from "../lib/markerLabels.ts";
 
@@ -125,4 +127,19 @@ test("does not let hidden labels intercept pointer events", () => {
   assert.equal(isLabelInteractive(true, 1), true);
   assert.equal(isLabelInteractive(false, 1), false);
   assert.equal(isLabelInteractive(true, 0.009), false);
+});
+
+test("uses distinct ray colors for each priority level", () => {
+  assert.equal(markerPriorityColor(100, false), "#b7d7a8");
+  assert.equal(markerPriorityColor(80, false), "#f4ca6a");
+  assert.equal(markerPriorityColor(60, false), "#7dc9e8");
+  assert.equal(markerPriorityColor(40, false), "#c6a9e8");
+  assert.equal(markerPriorityColor(40, true), "#fff1ad");
+});
+
+test("lowers the light top as the priority level decreases", () => {
+  assert.equal(markerPriorityHeight(100), 0.13);
+  assert.equal(markerPriorityHeight(80), 0.11);
+  assert.equal(markerPriorityHeight(60), 0.09);
+  assert.equal(markerPriorityHeight(40), 0.07);
 });
