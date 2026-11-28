@@ -103,6 +103,8 @@ test("renders the celestial sphere in the globe scene", () => {
   assert.match(globe, /buildCelestialSnapshot/);
   assert.match(globe, /sunDirectionEarthFixed/);
   assert.match(globe, /setInterval/);
+  assert.match(globe, /matchMedia\("\(min-width: 768px\)"\)/);
+  assert.doesNotMatch(globe, /const mobile = size\.width < 768/);
   assert.match(
     globe,
     /className="relative h-full w-full overflow-hidden rounded-\[2rem\]"/,

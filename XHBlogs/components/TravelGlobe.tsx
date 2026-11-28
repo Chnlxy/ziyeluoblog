@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Canvas, ThreeEvent, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, ThreeEvent, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -84,6 +84,24 @@ function useReducedMotion() {
   }, []);
 
   return reduced;
+}
+
+function useDesktopTextureSet() {
+  const [desktop, setDesktop] = useState(() =>
+    typeof window === "undefined"
+      ? false
+      : window.matchMedia("(min-width: 768px)").matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return desktop;
 }
 
 function useSceneActive(
@@ -223,13 +241,14 @@ function GlobeControls({
 
 function Earth({
   sun,
+  desktopTextures,
   onReady,
 }: {
   sun: [number, number, number];
+  desktopTextures: boolean;
   onReady: () => void;
 }) {
-  const { size } = useThree();
-  const mobile = size.width < 768;
+  const mobile = !desktopTextures;
   const [dayMap, nightMap] = useLoader(THREE.TextureLoader, [
     mobile ? EARTH_DAY_MOBILE : EARTH_DAY,
     mobile ? EARTH_NIGHT_MOBILE : EARTH_NIGHT,
@@ -262,7 +281,7 @@ function Earth({
 
   useEffect(() => () => material.dispose(), [material]);
 
-  const segments = size.width < 768 ? 64 : 96;
+  const segments = desktopTextures ? 96 : 64;
 
   return (
     <mesh>
@@ -602,6 +621,7 @@ function TravelScene({
   selectedId,
   focusedId,
   active,
+  desktopTextures,
   onSelect,
   onTexturesReady,
 }: {
@@ -609,6 +629,7 @@ function TravelScene({
   selectedId: string | null;
   focusedId: string | null;
   active: boolean;
+  desktopTextures: boolean;
   onSelect: (id: string | null) => void;
   onTexturesReady: () => void;
 }) {
@@ -689,7 +710,11 @@ function TravelScene({
       />
       {celestial && <CelestialSphere snapshot={celestial} />}
       <Suspense fallback={null}>
-        <Earth sun={sun} onReady={onTexturesReady} />
+        <Earth
+          sun={sun}
+          desktopTextures={desktopTextures}
+          onReady={onTexturesReady}
+        />
       </Suspense>
       <Marker
         id="hangzhou"
@@ -744,6 +769,7 @@ export default function TravelGlobe({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pageVisible = useSceneActive(containerRef);
+  const desktopTextures = useDesktopTextureSet();
   const [maxDpr, setMaxDpr] = useState(1.5);
   const [focusedPlaceId, setFocusedPlaceId] = useState<string | null>(null);
   const [texturesReady, setTexturesReady] = useState(false);
@@ -780,6 +806,7 @@ export default function TravelGlobe({
           selectedId={selectedId}
           focusedId={focusedPlaceId}
           active={pageVisible}
+          desktopTextures={desktopTextures}
           onSelect={onSelect}
           onTexturesReady={handleTexturesReady}
         />
